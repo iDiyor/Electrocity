@@ -9,7 +9,7 @@ class ECGameScene : public CCLayer
 {
 public:
 
-	CCScene* scene();
+	static CCScene* scene();
 	virtual bool init();
 
 	CREATE_FUNC(ECGameScene);
