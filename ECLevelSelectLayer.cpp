@@ -3,6 +3,7 @@
 #include "ECScrollView.h"
 #include "ECDataProviderExt.h"
 #include "ECDataProvider.h"
+#include "ECSceneManager.h"
 
 ECLevelSelectLayer::ECLevelSelectLayer() {
 
@@ -83,11 +84,26 @@ bool ECLevelSelectLayer::init()
 		this->addChild(scroller);
 
 		//this->scheduleUpdate();
+		// total score label
 		CCString* total_score_string = CCString::createWithFormat("Score: %i", ECDataProvider::GetGeneralScore());
 		CCLabelBMFont* total_score_label = CCLabelBMFont::create(total_score_string->getCString(), "general_font.fnt");
 		total_score_label->setPosition(ccp(screen_size_.width - total_score_label->getContentSize().width * 0.6f, 
 										   total_score_label->getContentSize().height * 0.6f));
 		this->addChild(total_score_label);
+
+		// main menu back button
+		CCSprite* back_button_sprite = CCSprite::createWithSpriteFrameName("back.png");
+		CCSprite* back_button_sprite_selected = CCSprite::createWithSpriteFrameName("back_selected.png");
+		CCMenuItemSprite* back_button = CCMenuItemSprite::create(back_button_sprite, 
+																 back_button_sprite_selected,	
+																 NULL,
+																 this,
+																 menu_selector(ECLevelSelectLayer::GoMainMenu));
+		back_button->setPosition(ccp(back_button->getContentSize().width * 0.7f, back_button->getContentSize().height * 0.7f));
+		CCMenu* menu = CCMenu::create(back_button, NULL);
+		menu->setPosition(ccp(0,0));
+		this->addChild(menu);
+
 
 		isSuccess = true;
 	}while(0);
@@ -105,4 +121,7 @@ void ECLevelSelectLayer::scrollViewDidScroll(CCScrollView* view)
 void ECLevelSelectLayer::scrollViewDidZoom(CCScrollView* view)
 {
 
+}
+void ECLevelSelectLayer::GoMainMenu(CCObject* sender) {
+	ECSceneManager::GoMainMenuScene();
 }

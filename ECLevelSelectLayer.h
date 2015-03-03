@@ -29,5 +29,7 @@ private:
 	CCSize screen_size_;
 
 	CCScrollView* scroll_view_;
+
+	void GoMainMenu(CCObject* sender);
 };
 #endif //__EC_LEVEL_SELECT_LAYER__
