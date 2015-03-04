@@ -16,7 +16,31 @@ public:
 
 	ECSettingsScene();
 	~ECSettingsScene();
-	
+
+private:
+
+	/**
+	* Tags for toggle menu items
+	* Music, about and sound
+	*/
+	enum {
+		T_MUSIC,
+		T_ABOUT,
+		T_SOUND
+	};
+
+	void GoMainMenu(CCObject* sender);
+	/**
+	* Music - About - Sound -> MAS
+	* Turns on/off music
+	* Turns on/off sound effects
+	* shows/hides about info board
+	*/
+	void OnMASSettingsChanged(CCObject* sender);
+	void OnAboutClicked();
+
+
+	CCSprite* about_board;
 };
 
 #endif //_EC_SETTINGS_SCENE_H_

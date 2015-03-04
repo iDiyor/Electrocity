@@ -32,6 +32,7 @@ ECGameScene::~ECGameScene()
 	delete game_level_data_;
 	game_level_data_ = NULL;
 
+	// removing cached sprite files
 	CCSpriteFrameCache::sharedSpriteFrameCache()->removeSpriteFramesFromFile("game_layer_spritesheet.plist");
 }
 CCScene* ECGameScene::sceneWithGameLayerToLevel(std::string& level)
