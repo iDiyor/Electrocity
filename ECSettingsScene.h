@@ -39,8 +39,8 @@ private:
 	void OnMASSettingsChanged(CCObject* sender);
 	void OnAboutClicked();
 
-
-	CCSprite* about_board;
+	CCSize screen_size_;
+	CCSprite* about_board_;
 };
 
 #endif //_EC_SETTINGS_SCENE_H_

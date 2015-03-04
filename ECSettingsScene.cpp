@@ -29,7 +29,7 @@ bool ECSettingsScene::init() {
   do {
 		CC_BREAK_IF(!CCLayer::init());
     
-		CCSize screen_size = CCDirector::sharedDirector()->getWinSize();
+		screen_size_ = CCDirector::sharedDirector()->getWinSize();
     
 
 		CCTexture2D::PVRImagesHavePremultipliedAlpha(true);
@@ -44,14 +44,14 @@ bool ECSettingsScene::init() {
 		
 		// about/credits board
 		// moving down from top and going up
-		about_board = CCSprite::createWithSpriteFrameName("credits.png");
-		about_board->setAnchorPoint(ccp(0.5f, 1.0f));
-		about_board->setPosition(ccp(screen_size.width * 0.5f, screen_size.height + about_board->getContentSize().height));
-		settings_spritesheet->addChild(about_board);
+		about_board_ = CCSprite::createWithSpriteFrameName("credits.png");
+		about_board_->setAnchorPoint(ccp(0.5f, 1.0f));
+		about_board_->setPosition(ccp(screen_size_.width * 0.5f, screen_size_.height + about_board_->getContentSize().height));
+		settings_spritesheet->addChild(about_board_);
 
 		// settings name boards
 		CCSprite* settings_name_board = CCSprite::createWithSpriteFrameName("settings_name.png");
-		settings_name_board->setPosition(ccp(screen_size.width * 0.547f, screen_size.height * 0.277f));
+		settings_name_board->setPosition(ccp(screen_size_.width * 0.547f, screen_size_.height * 0.277f));
 		settings_spritesheet->addChild(settings_name_board);
 
 		// music house
@@ -64,7 +64,7 @@ bool ECSettingsScene::init() {
 																			music_button_on,
 																			music_button_off,
 																			NULL);
-		music_button->setPosition(ccp(screen_size.width * 0.32f, screen_size.height * 0.22f));
+		music_button->setPosition(ccp(screen_size_.width * 0.32f, screen_size_.height * 0.22f));
 		music_button->setTag(T_MUSIC);
 
 		// about house
@@ -77,7 +77,7 @@ bool ECSettingsScene::init() {
 																			about_button_on,
 																			about_button_off,
 																			NULL);
-		about_button->setPosition(ccp(screen_size.width * 0.533f, screen_size.height * 0.3f));
+		about_button->setPosition(ccp(screen_size_.width * 0.533f, screen_size_.height * 0.3f));
 		about_button->setTag(T_ABOUT);
 
 		// sound house
@@ -90,7 +90,7 @@ bool ECSettingsScene::init() {
 																			sound_button_on,
 																			sound_button_off,
 																			NULL);
-		sound_button->setPosition(ccp(screen_size.width * 0.735f, screen_size.height * 0.268f));
+		sound_button->setPosition(ccp(screen_size_.width * 0.735f, screen_size_.height * 0.268f));
 		sound_button->setTag(T_SOUND);
 
 		// main menu back button
@@ -116,7 +116,8 @@ void ECSettingsScene::GoMainMenu(CCObject* sender) {
 	ECSceneManager::GoMainMenuScene();	
 }
 void ECSettingsScene::OnMASSettingsChanged(CCObject* sender) {
-	CCMenuItem* toggle_button = (CCMenuItemToggle*)sender;
+	CCMenuItemToggle* toggle_button = (CCMenuItemToggle*)sender;
+
 	switch (toggle_button->getTag())
 	{
 	case T_MUSIC:
@@ -129,6 +130,16 @@ void ECSettingsScene::OnMASSettingsChanged(CCObject* sender) {
 	}
 }
 void ECSettingsScene::OnAboutClicked() {
-	CCMoveBy* move_down = CCMoveBy::create(0.3f, ccp(0, -about_board->getContentSize().height));
-	about_board->runAction(move_down);
+
+	CCLOG("Y_POS: %.1f", about_board_->getPosition().y);
+
+	CCMoveBy* move_animaton;
+
+	if (about_board_->getPosition().y < screen_size_.height) {
+		move_animaton = CCMoveBy::create(0.3f, ccp(0, about_board_->getContentSize().height));
+	} else {
+		move_animaton = CCMoveBy::create(0.3f, ccp(0, -about_board_->getContentSize().height));
+	}
+	
+	about_board_->runAction(move_animaton);
 }
