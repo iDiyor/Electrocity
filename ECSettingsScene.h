@@ -41,6 +41,7 @@ private:
 
 	CCSize screen_size_;
 	CCSprite* about_board_;
+	
 };
 
 #endif //_EC_SETTINGS_SCENE_H_

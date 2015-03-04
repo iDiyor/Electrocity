@@ -131,15 +131,16 @@ void ECSettingsScene::OnMASSettingsChanged(CCObject* sender) {
 }
 void ECSettingsScene::OnAboutClicked() {
 
-	CCLOG("Y_POS: %.1f", about_board_->getPosition().y);
+	//CCLOG("Y_POS: %.1f", about_board_->getPosition().y);
 
-	CCMoveBy* move_animaton;
-
-	if (about_board_->getPosition().y < screen_size_.height) {
-		move_animaton = CCMoveBy::create(0.3f, ccp(0, about_board_->getContentSize().height));
-	} else {
-		move_animaton = CCMoveBy::create(0.3f, ccp(0, -about_board_->getContentSize().height));
-	}
+	CCMoveTo* move_animaton = NULL;
+	CCPoint current_position = about_board_->getPosition();
 	
-	about_board_->runAction(move_animaton);
+	if (current_position.y > screen_size_.height) {
+		move_animaton = CCMoveTo::create(0.3f, ccp(current_position.x, screen_size_.height));	
+	} else {
+		move_animaton = CCMoveTo::create(0.3f, ccp(current_position.x, screen_size_.height + about_board_->getContentSize().height));
+	} 
+
+	about_board_->runAction(move_animaton);	
 }
