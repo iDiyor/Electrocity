@@ -3,6 +3,8 @@
 //#include "ECMainMenuScene.h"
 //#include "ECLevelSelectLayer.h"
 #include "ECLoadingScene.h"
+#include "ECMainMenuScene.h"
+#include "ECSettingsScene.h"
 
 void ECSceneManager::GoGameSceneWithLevel(std::string& level)
 {
@@ -27,6 +29,21 @@ void ECSceneManager::GoMainMenuScene()
 		CCDirector::sharedDirector()->runWithScene(ECLoadingScene::loadingWithTargetSceneWithArgs(TARGET_SCENE_MAIN_MENU_SCENE, nullStr));
 	}
 }
+void ECSceneManager::GoMainMenuSceneWithoutLoadingScene() {
+	if (CCDirector::sharedDirector()->getRunningScene()) {
+		//CCDirector::sharedDirector()->replaceScene(ECLevelSelectLayer::scene());
+		CCTransitionSlideInL* transition = CCTransitionSlideInL::create(0.3f, ECMainMenuLayer::scene());
+		CCDirector::sharedDirector()->replaceScene(transition);
+	}
+	else {
+	//	//CCDirector::sharedDirector()->runWithScene(ECLevelSelectLayer::scene());
+	//	//CCDirector::sharedDirector()->runWithScene(ECLoadingScene::loadingWithTargetSceneWithArgs(TARGET_SCENE_SETTINGS_SCENE, nullStr));
+	//	
+		CCTransitionSlideInL* transition = CCTransitionSlideInL::create(0.3f, ECMainMenuLayer::scene());
+		CCDirector::sharedDirector()->runWithScene(transition);
+	}
+}
+
 void ECSceneManager::GoLevelSelectScene()
 {
 	std::string nullStr = "0";
@@ -48,5 +65,19 @@ void ECSceneManager::GoSettingsScene() {
 	else {
 		//CCDirector::sharedDirector()->runWithScene(ECLevelSelectLayer::scene());
 		CCDirector::sharedDirector()->runWithScene(ECLoadingScene::loadingWithTargetSceneWithArgs(TARGET_SCENE_SETTINGS_SCENE, nullStr));
+	}
+}
+void ECSceneManager::GoSettingsSceneWithoutLoadingScene() {
+	if (CCDirector::sharedDirector()->getRunningScene()) {
+		//CCDirector::sharedDirector()->replaceScene(ECLevelSelectLayer::scene());
+		CCTransitionSlideInR* transition = CCTransitionSlideInR::create(0.3f, ECSettingsScene::scene());
+		CCDirector::sharedDirector()->replaceScene(transition);
+	}
+	else {
+	//	//CCDirector::sharedDirector()->runWithScene(ECLevelSelectLayer::scene());
+	//	//CCDirector::sharedDirector()->runWithScene(ECLoadingScene::loadingWithTargetSceneWithArgs(TARGET_SCENE_SETTINGS_SCENE, nullStr));
+	//	
+		CCTransitionSlideInR* transition = CCTransitionSlideInR::create(0.3f, ECSettingsScene::scene());
+		CCDirector::sharedDirector()->runWithScene(transition);
 	}
 }

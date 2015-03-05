@@ -11,8 +11,11 @@ public:
 
 	static void GoGameSceneWithLevel(std::string& level);
 	static void GoMainMenuScene();
+	static void GoMainMenuSceneWithoutLoadingScene();
 	static void GoLevelSelectScene();
 	static void GoSettingsScene();
+	static void GoSettingsSceneWithoutLoadingScene();
+
 
 };
 
