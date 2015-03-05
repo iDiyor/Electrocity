@@ -3,6 +3,8 @@
 #define BEST_TIME_KEY "BEST_TIME"
 #define BEST_SCORE_KEY "BEST_SCORE"
 #define GENERAL_SCORE_KEY "GENERAL_SCORE"
+#define MUSIC_KEY "MUSIC_SETTING"
+#define SOUND_KEY "SOUND_SETTING"
 
 void ECDataProvider::SetBestTimeForLevel(const float time, const std::string& level) {
 	std::string key_string = level + "_" + BEST_TIME_KEY;	// level1_BEST_TIME
@@ -32,6 +34,17 @@ void ECDataProvider::SetGeneralScore(const int score) {
 			CCUserDefault::sharedUserDefault()->setIntegerForKey(GENERAL_SCORE_KEY, new_score);
 	}
 }
+void ECDataProvider::SetSettingsParameter(SettingsParameter parameter, bool is_enabled) {
+	switch (parameter)
+	{
+	case MUSIC:
+		CCUserDefault::sharedUserDefault()->setBoolForKey(MUSIC_KEY, is_enabled);
+		break;
+	case SOUND:
+		CCUserDefault::sharedUserDefault()->setBoolForKey(SOUND_KEY, is_enabled);
+		break;
+	}
+}
 float ECDataProvider::GetBestTimeForLevel(const std::string& level) {
 	std::string key_string = level + "_" + BEST_TIME_KEY; // string builder
 	return CCUserDefault::sharedUserDefault()->getFloatForKey(key_string.c_str());
@@ -42,4 +55,17 @@ int ECDataProvider::GetBestScoreForLevel(const std::string& level) {
 }
 int ECDataProvider::GetGeneralScore() {
 	return CCUserDefault::sharedUserDefault()->getIntegerForKey(GENERAL_SCORE_KEY);
+}
+bool ECDataProvider::GetSettingsParameter(SettingsParameter parameter) {
+	bool result = false;
+	switch (parameter)
+	{
+	case MUSIC:
+		result = CCUserDefault::sharedUserDefault()->getBoolForKey(MUSIC_KEY);
+		break;
+	case SOUND:
+		result = CCUserDefault::sharedUserDefault()->getBoolForKey(SOUND_KEY);
+		break;
+	}
+	return result;
 }
