@@ -75,8 +75,21 @@ bool ECMainMenuLayer::init()
 		settings_button->setPosition(ccp(screen_size_.width * 0.9f, screen_size_.height * 0.15f));
 		settings_button->setTag(T_SETTINGS);
 
+		// leaderboards button
+		CCSprite* leaderboards_button_sprite = CCSprite::createWithSpriteFrameName("leaderboards.png");
+		CCSprite* leaderboards_button_selected_sprite = CCSprite::createWithSpriteFrameName("leaderboards.png");
+		CCMenuItemSprite* leaderboards_button = CCMenuItemSprite::create(leaderboards_button_sprite,
+																		 leaderboards_button_selected_sprite,
+																		 NULL,
+																		 this,
+																		 menu_selector(ECMainMenuLayer::onButtonClicked));
+		leaderboards_button->setPosition(ccp(screen_size_.width * 0.75f, screen_size_.height * 0.12f));
+		leaderboards_button->setTag(T_LEADERBOARDS);
+
+
+
 		// parent menu
-		CCMenu* menu = CCMenu::create(play_button, settings_button, NULL);
+		CCMenu* menu = CCMenu::create(play_button, settings_button, leaderboards_button, NULL);
 		menu->setPosition(ccp(0,0));
 		this->addChild(menu);
 
@@ -93,6 +106,9 @@ void ECMainMenuLayer::onButtonClicked(CCObject* pSender)
 		ECSceneManager::GoLevelSelectScene();
 		break;
 	case T_SETTINGS:
+		ECSceneManager::GoSettingsScene();
+		break;
+	case T_LEADERBOARDS:
 		ECSceneManager::GoSettingsScene();
 		break;
 	default:

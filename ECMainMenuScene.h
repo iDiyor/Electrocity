@@ -22,7 +22,9 @@ private:
 
 	enum {
 	        T_PLAY,
-		T_SETTINGS
+		T_SETTINGS,
+		T_LEADERBOARDS,
+
 	};
 
 	/*
