@@ -38,6 +38,7 @@ private:
 	*/
 	void OnMASSettingsChanged(CCObject* sender);
 	void OnAboutClicked();
+	void OnTrashcanClicked(CCObject* sender);
 
 	CCSize screen_size_;
 	CCSprite* about_board_;

@@ -1,5 +1,7 @@
 #include "ECSettingsScene.h"
 #include "ECSceneManager.h"
+#include "ECDataProvider.h"
+#include "ECDataProviderExt.h"
 
 ECSettingsScene::ECSettingsScene(){
 
@@ -47,7 +49,7 @@ bool ECSettingsScene::init() {
 		this->addChild(settings_spritesheet);
 
 		// background
-		CCSprite* background_sprite = CCSprite::createWithSpriteFrameName("background.png");
+		CCSprite* background_sprite = CCSprite::createWithSpriteFrameName("settings_background.png");
 		background_sprite->setAnchorPoint(ccp(0,0));
 		settings_spritesheet->addChild(background_sprite);
 		
@@ -102,6 +104,16 @@ bool ECSettingsScene::init() {
 		sound_button->setPosition(ccp(screen_size_.width * 0.735f, screen_size_.height * 0.268f));
 		sound_button->setTag(T_SOUND);
 
+		// trash can
+		CCSprite* trashcan_button_sprite = CCSprite::createWithSpriteFrameName("data_reset.png");
+		CCSprite* trashcan_button_selected_sprite = CCSprite::createWithSpriteFrameName("data_reset_selected.png");
+		CCMenuItemSprite* trashcan_button = CCMenuItemSprite::create(trashcan_button_sprite,
+																	 trashcan_button_selected_sprite,
+																	 NULL,
+																	 this,
+																	 menu_selector(ECSettingsScene::OnTrashcanClicked));
+		trashcan_button->setPosition(ccp(screen_size_.width * 0.188f, screen_size_.height * 0.13f));
+
 		// main menu back button
 		CCSprite* back_button_sprite = CCSprite::createWithSpriteFrameName("back.png");
 		CCSprite* back_button_sprite_selected = CCSprite::createWithSpriteFrameName("back_selected.png");
@@ -111,7 +123,7 @@ bool ECSettingsScene::init() {
 																 this,
 																 menu_selector(ECSettingsScene::GoMainMenu));
 		back_button->setPosition(ccp(back_button->getContentSize().width * 0.7f, back_button->getContentSize().height * 0.7f));
-		CCMenu* menu = CCMenu::create(back_button, music_button, about_button, sound_button,NULL);
+		CCMenu* menu = CCMenu::create(back_button, music_button, about_button, sound_button, trashcan_button,NULL);
 		menu->setPosition(ccp(0,0));
 		this->addChild(menu);
 
@@ -122,7 +134,7 @@ bool ECSettingsScene::init() {
   return is_success;
 }
 void ECSettingsScene::GoMainMenu(CCObject* sender) {
-	ECSceneManager::GoMainMenuScene();	
+	ECSceneManager::GoMainMenuSceneWithoutLoadingScene();	
 }
 void ECSettingsScene::OnMASSettingsChanged(CCObject* sender) {
 	CCMenuItemToggle* toggle_button = (CCMenuItemToggle*)sender;
@@ -152,4 +164,25 @@ void ECSettingsScene::OnAboutClicked() {
 	} 
 
 	about_board_->runAction(move_animaton);	
+}
+void ECSettingsScene::OnTrashcanClicked(CCObject* sender) {
+	ECDataProviderExt* data_provider = new ECDataProviderExt("level_state.xml", "levels");
+	// first level
+	data_provider->SetPlayedAndStarsOnLevelButton("level1", false, 0);
+	data_provider->SetBlockForLevel("level1", false);
+
+	// levels : 2 - 60 : blocked and 0 stars
+	for (int i = 2; i <= 60; i++) {
+		CCString* level_name = CCString::createWithFormat("level%i", i);
+		data_provider->SetPlayedAndStarsOnLevelButton(level_name->getCString(), false, 0);
+		data_provider->SetBlockForLevel(level_name->getCString(), true);
+		CCLOG("LEVEL: %s", level_name->getCString());
+	}
+
+	ECDataProvider::SetGeneralScore(0);
+
+	// saves data in xml
+	data_provider->SaveFile();
+	delete data_provider;
+	data_provider = NULL;
 }

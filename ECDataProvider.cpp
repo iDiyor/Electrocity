@@ -20,6 +20,11 @@ void ECDataProvider::SetBestScoreForLevel(const int score, const std::string& le
 	}
 }
 void ECDataProvider::SetGeneralScore(const int score) {
+	
+	// request to delete score
+	if (score == 0)
+		CCUserDefault::sharedUserDefault()->setIntegerForKey(GENERAL_SCORE_KEY, score);
+	
 	if ((GetGeneralScore() == 0) ||
 		(GetGeneralScore() > 0)) {
 			int old_score = GetGeneralScore();
