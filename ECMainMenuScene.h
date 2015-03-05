@@ -21,8 +21,8 @@ public:
 private:
 
 	enum {
-		kPlayButton,
-		kSettingsButton
+	        T_PLAY,
+		T_SETTINGS
 	};
 
 	/*
@@ -31,6 +31,8 @@ private:
 	* Settings
 	*/
 	void onButtonClicked(CCObject* pSender);
+
+	CCSize screen_size_;
 };
 
 

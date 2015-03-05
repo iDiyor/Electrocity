@@ -6,7 +6,16 @@ ECSettingsScene::ECSettingsScene(){
 }
 
 ECSettingsScene::~ECSettingsScene(){
-
+	
+	/** 
+	* removing cached sprite files
+	* All scenes uses the same file name for background sprite - "background"
+	* while switching from one scene to another, this name collision causes
+	* sprite frame cache a problem not knowing which one to use.
+	* Therefore, in destructor we removing previous spritesheet before loading new one
+	* to prevent name collision.
+	*/
+	CCSpriteFrameCache::sharedSpriteFrameCache()->removeSpriteFramesFromFile("settings_spritesheet.plist");
 }
 
 CCScene* ECSettingsScene::scene() {
