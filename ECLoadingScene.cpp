@@ -73,8 +73,13 @@ void ECLoadingScene::update(float delta)
 	case TARGET_SCENE_LEVEL_SELECT_SCENE:
 		CCDirector::sharedDirector()->replaceScene(ECLevelSelectLayer::scene());
 		break;
-	case TARGET_SCENE_SETTINGS_SCENE:
-		CCDirector::sharedDirector()->replaceScene(ECSettingsScene::scene());
+	case TARGET_SCENE_SETTINGS_SCENE: 
+		{
+			CCTransitionSlideInR* transition = CCTransitionSlideInR::create(0.3f, ECSettingsScene::scene());
+			CCDirector::sharedDirector()->replaceScene(transition);
+
+		}
+		
 		break;
 	default:
 		//

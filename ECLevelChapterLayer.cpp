@@ -150,6 +150,9 @@ void ECLevelChapterLayer::CreateLevelSelectButtons(int row,											// rows
 						case 1:
 							stars_board_sprite = CCSprite::createWithSpriteFrameName("one_star.png");
 						break;
+						case 0:
+						continue; // if zero no stars
+						break;
 					} // switch statement
 					stars_board_sprite->setPosition(ccp(button->getContentSize().width * 0.85f, button->getContentSize().height * 0.25f));
 					button->addChild(stars_board_sprite);

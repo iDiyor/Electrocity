@@ -15,7 +15,7 @@ ECMainMenuLayer::~ECMainMenuLayer()
 	* Therefore, in destructor we removing previous spritesheet before loading new one
 	* to prevent name collision.
 	*/
-	CCSpriteFrameCache::sharedSpriteFrameCache()->removeSpriteFramesFromFile("main_menu_spritesheet.plist");
+	CCSpriteFrameCache::sharedSpriteFrameCache()->removeSpriteFramesFromFile("main_menu_spritesheet.plist");	
 }
 CCScene* ECMainMenuLayer::scene()
 {
@@ -43,12 +43,13 @@ bool ECMainMenuLayer::init()
 		screen_size_ = CCDirector::sharedDirector()->getWinSize();
 
 		CCTexture2D::PVRImagesHavePremultipliedAlpha(true);
+		// main menu spritesheet
 		CCSpriteFrameCache::sharedSpriteFrameCache()->addSpriteFramesWithFile("main_menu_spritesheet.plist");
 		CCSpriteBatchNode* main_menu_spritesheet = CCSpriteBatchNode::create("main_menu_spritesheet.pvr.ccz");
 		this->addChild(main_menu_spritesheet);
 
 		//background
-		CCSprite* background = CCSprite::createWithSpriteFrameName("background.png");
+		CCSprite* background = CCSprite::createWithSpriteFrameName("main_menu_background.png");
 		background->setAnchorPoint(ccp(0,0));
 		main_menu_spritesheet->addChild(background);
 
@@ -106,7 +107,7 @@ void ECMainMenuLayer::onButtonClicked(CCObject* pSender)
 		ECSceneManager::GoLevelSelectScene();
 		break;
 	case T_SETTINGS:
-		ECSceneManager::GoSettingsScene();
+		ECSceneManager::GoSettingsSceneWithoutLoadingScene();
 		break;
 	case T_LEADERBOARDS:
 		ECSceneManager::GoSettingsScene();
