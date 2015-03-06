@@ -5,6 +5,7 @@
 #define GENERAL_SCORE_KEY "GENERAL_SCORE"
 #define MUSIC_KEY "MUSIC_SETTING"
 #define SOUND_KEY "SOUND_SETTING"
+#define LAUNCH_COUNTER_KEY "LUANCH_COUNT"
 
 void ECDataProvider::SetBestTimeForLevel(const float time, const std::string& level) {
 	std::string key_string = level + "_" + BEST_TIME_KEY;	// level1_BEST_TIME
@@ -45,6 +46,9 @@ void ECDataProvider::SetSettingsParameter(SettingsParameter parameter, bool is_e
 		break;
 	}
 }
+void ECDataProvider::SetGameLaunchCounter(const int number) {
+	CCUserDefault::sharedUserDefault()->setIntegerForKey(LAUNCH_COUNTER_KEY, number);
+}
 float ECDataProvider::GetBestTimeForLevel(const std::string& level) {
 	std::string key_string = level + "_" + BEST_TIME_KEY; // string builder
 	return CCUserDefault::sharedUserDefault()->getFloatForKey(key_string.c_str());
@@ -68,4 +72,7 @@ bool ECDataProvider::GetSettingsParameter(SettingsParameter parameter) {
 		break;
 	}
 	return result;
+}
+int ECDataProvider::GetGameLaunchCounter() {
+	CCUserDefault::sharedUserDefault()->getIntegerForKey(LAUNCH_COUNTER_KEY);
 }
