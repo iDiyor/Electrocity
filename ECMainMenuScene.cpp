@@ -1,5 +1,7 @@
 #include "ECMainMenuScene.h"
 #include "ECSceneManager.h"
+#include "ECDataProvider.h"
+#include "ECAudioManager.h"
 
 ECMainMenuLayer::ECMainMenuLayer()
 {
@@ -16,6 +18,9 @@ ECMainMenuLayer::~ECMainMenuLayer()
 	* to prevent name collision.
 	*/
 	CCSpriteFrameCache::sharedSpriteFrameCache()->removeSpriteFramesFromFile("main_menu_spritesheet.plist");	
+
+	delete audio_manager_;
+	audio_manager_ = NULL;
 }
 CCScene* ECMainMenuLayer::scene()
 {
@@ -87,12 +92,19 @@ bool ECMainMenuLayer::init()
 		leaderboards_button->setPosition(ccp(screen_size_.width * 0.75f, screen_size_.height * 0.12f));
 		leaderboards_button->setTag(T_LEADERBOARDS);
 
-
-
 		// parent menu
 		CCMenu* menu = CCMenu::create(play_button, settings_button, leaderboards_button, NULL);
 		menu->setPosition(ccp(0,0));
 		this->addChild(menu);
+
+		// audio
+		audio_manager_ = ECAudioManager::CreateAudioManagerForScene(MAIN_MENU_SCENE_AUDIO);
+		audio_manager_->PlayBackgroundMusic();
+		if (ECDataProvider::GetGameLaunchCounter() == 0) {
+			audio_manager_->MusicSetting(true);
+			audio_manager_->SoundSetting(true);
+			ECDataProvider::SetGameLaunchCounter(1);
+		}
 
 		is_success = true;
 	}while(0);
@@ -104,16 +116,28 @@ void ECMainMenuLayer::onButtonClicked(CCObject* pSender)
 	switch (button->getTag())
 	{
 	case T_PLAY:
-		ECSceneManager::GoLevelSelectScene();
+		{
+			audio_manager_->PlayButtonClickSound();
+			ECSceneManager::GoLevelSelectScene();
+		}
 		break;
 	case T_SETTINGS:
-		ECSceneManager::GoSettingsSceneWithoutLoadingScene();
+		{
+			audio_manager_->PlayButtonClickSound();
+			ECSceneManager::GoSettingsSceneWithoutLoadingScene();
+		}
 		break;
 	case T_LEADERBOARDS:
-		ECSceneManager::GoSettingsScene();
+		{
+			audio_manager_->PlayButtonClickSound();
+			ECSceneManager::GoSettingsScene();
+		}
 		break;
 	default:
-		ECSceneManager::GoLevelSelectScene();
+		{
+			audio_manager_->PlayButtonClickSound();
+			ECSceneManager::GoLevelSelectScene();
+		}
 		break;
 	}
 }

@@ -5,7 +5,7 @@
 
 using namespace cocos2d;
 
-
+class ECAudioManager;
 
 class ECMainMenuLayer : public CCLayer
 {
@@ -22,9 +22,8 @@ private:
 
 	enum {
 	        T_PLAY,
-		T_SETTINGS,
-		T_LEADERBOARDS,
-
+			T_SETTINGS,
+			T_LEADERBOARDS,
 	};
 
 	/*
@@ -35,6 +34,7 @@ private:
 	void onButtonClicked(CCObject* pSender);
 
 	CCSize screen_size_;
+	ECAudioManager* audio_manager_;
 };
 
 
