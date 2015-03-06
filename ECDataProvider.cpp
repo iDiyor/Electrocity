@@ -38,10 +38,10 @@ void ECDataProvider::SetGeneralScore(const int score) {
 void ECDataProvider::SetSettingsParameter(SettingsParameter parameter, bool is_enabled) {
 	switch (parameter)
 	{
-	case MUSIC:
+	case MUSIC_SETTING:
 		CCUserDefault::sharedUserDefault()->setBoolForKey(MUSIC_KEY, is_enabled);
 		break;
-	case SOUND:
+	case SOUND_SETTING:
 		CCUserDefault::sharedUserDefault()->setBoolForKey(SOUND_KEY, is_enabled);
 		break;
 	}
@@ -64,15 +64,15 @@ bool ECDataProvider::GetSettingsParameter(SettingsParameter parameter) {
 	bool result = false;
 	switch (parameter)
 	{
-	case MUSIC:
+	case MUSIC_SETTING:
 		result = CCUserDefault::sharedUserDefault()->getBoolForKey(MUSIC_KEY);
 		break;
-	case SOUND:
+	case SOUND_SETTING:
 		result = CCUserDefault::sharedUserDefault()->getBoolForKey(SOUND_KEY);
 		break;
 	}
 	return result;
 }
 int ECDataProvider::GetGameLaunchCounter() {
-	CCUserDefault::sharedUserDefault()->getIntegerForKey(LAUNCH_COUNTER_KEY);
+	return CCUserDefault::sharedUserDefault()->getIntegerForKey(LAUNCH_COUNTER_KEY);
 }

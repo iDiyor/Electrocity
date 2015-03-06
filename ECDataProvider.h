@@ -5,14 +5,15 @@
 
 USING_NS_CC;
 
-class ECDataProvider {
-public:
-	// settings 
+// settings (global)
 	typedef enum {
-		MUSIC,
-		SOUND,
+		MUSIC_SETTING,
+		SOUND_SETTING,
 	}SettingsParameter;
 
+class ECDataProvider {
+public:
+	
 	/**
 	*	setters - best time(in float) and best score(in int)
 	*/
@@ -28,6 +29,7 @@ public:
 	* Sets the number of game launches
 	* When game is launched for the first time, settings (music,sounds...) are 
 	* created and saved inside the app (xml)
+	* At the moment, it is used only once. +1
 	*/
 	static void SetGameLaunchCounter(const int number);
 	/**
