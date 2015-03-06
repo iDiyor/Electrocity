@@ -5,6 +5,7 @@
 #include "ECDataProviderExt.h"
 #include "ECSceneManager.h"
 #include "ECDataProvider.h"
+#include "ECAudioManager.h"
 
 #include <cstdlib>
 
@@ -34,6 +35,10 @@ ECGameScene::~ECGameScene()
 
 	// removing cached sprite files
 	CCSpriteFrameCache::sharedSpriteFrameCache()->removeSpriteFramesFromFile("game_layer_spritesheet.plist");
+
+	// audio
+	delete audio_manager_;
+	audio_manager_ = NULL;
 }
 CCScene* ECGameScene::sceneWithGameLayerToLevel(std::string& level)
 {
@@ -157,6 +162,12 @@ bool ECGameScene::initGameLayerToLayer(std::string& level)
 		CCLabelBMFont* lightsCounterLabel = CCLabelBMFont::create(CCString::createWithFormat("0 | %i", buildings_.size())->getCString(), "general_font.fnt");
 		lightsCounterLabel->setPosition(ccp(screen_size_.width * 0.5f, levelTimeLabel->getPosition().y));
 		this->addChild(lightsCounterLabel, Z_UI_LABELS, T_LEVEL_LIGHTS_COUNTER);
+
+
+		// audio
+		audio_manager_ = ECAudioManager::CreateAudioManagerForScene(GAME_SCENE_AUDIO);
+		audio_manager_->PlayBackgroundMusic();
+
 
 		this->scheduleUpdate();
 
@@ -377,6 +388,9 @@ void ECGameScene::checkForWinState() {
 void ECGameScene::pauseGame(CCObject* pSender) {
 	CCLOG("PAUSE BUTTON");
 
+	// click
+	audio_manager_->PlayButtonClickSound();
+
 	// pause the loop | update method.
 	this->pauseGameLoop(true);
 
@@ -473,7 +487,8 @@ void ECGameScene::pauseGameLoop(bool isPaused) {
 	}
 }
 void ECGameScene::restartGame(CCObject* pSender) {
-	// just restart scene with current level
+	audio_manager_->PlayButtonClickSound();
+	// just restart scene with a current level
 	ECSceneManager::GoGameSceneWithLevel(current_level_);
 }
 void ECGameScene::nextLevel(CCObject* pSender) {
@@ -531,8 +546,14 @@ void ECGameScene::pauseMenuItemClicked(CCObject* pSender) {
 		ECSceneManager::GoMainMenuScene();
 		break;
 	}
+
+	// sound
+	audio_manager_->PlayButtonClickSound();
 }
 void ECGameScene::winGame() {
+
+	// audio
+	audio_manager_->PlayActionWinSound();
 
 	// pause game loop
 	//this->pauseGameLoop(true);
@@ -632,8 +653,10 @@ void ECGameScene::winGame() {
 
 	// level complete stamp sprite animation
 	CCDelayTime* level_completed_stamp_sprite_delay_time = CCDelayTime::create(0.2f);
+	CCCallFunc* call_completed_sound_effect_play_function = CCCallFunc::create(this, callfunc_selector(ECGameScene::PlayCompletedSoundEffect));
 	CCScaleTo* level_completed_stamp_sprite_animation = CCScaleTo::create(0.2f, 1.0f);
 	CCSequence* level_completed_stamp_sprite_sequence = CCSequence::create(level_completed_stamp_sprite_delay_time, // delay time and give some time for the win info board to complete it's animation
+																		   call_completed_sound_effect_play_function,
 																		   level_completed_stamp_sprite_animation,	// scale down animation of the stamp
 																		   NULL);
 	level_completed_stamp_sprite->runAction(level_completed_stamp_sprite_sequence);
@@ -734,6 +757,9 @@ int ECGameScene::GetNumberOfStarstFromPercentage(int percentage) {
 	return number_of_starts;
 }
 void ECGameScene::AddStarsOnWinBoard(const int star_number) {
+	// audio
+	audio_manager_->PlayActionCompletedSound();
+	
 	// win info board sprite node
 	CCNode* win_info_board = this->getChildByTag(T_WIN_INFO_BOARD);
 
@@ -750,6 +776,10 @@ void ECGameScene::AddStarsOnWinBoard(const int star_number) {
 		CCScaleTo* start_scale_animation = CCScaleTo::create(0.2f, 1.0f);
 		start_sprite->runAction(start_scale_animation);
 	}
+}
+void ECGameScene::PlayCompletedSoundEffect() {
+	// audio
+	audio_manager_->PlayActionCompletedSound();
 }
 int ECGameScene::GetCurrentLevelNumber() const {
 	// extracted int value from a String object representing current level (i.e. "level13" -> returns 13)

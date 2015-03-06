@@ -8,6 +8,7 @@ using namespace	cocos2d;
 
 class ECDataProviderExt;
 class ECTower;
+class ECAudioManager;
 
 class ECGameScene : public CCLayer
 {
@@ -76,6 +77,93 @@ private:
 		A_MOVE_UP
 	} UIElementsMoveDirection;
 
+
+	void loadGameDataForLevel(const char* level);
+	void createTowerInQuant(const int quantity, const char* imgName, const float scale);
+	void createBuildingInQuant(const int quantity, const char* imgName, const float scale);
+	void createLines(bool isCircleClosed);
+	void resetLines();
+	void resetGameObjectsOfType(NodeType node);
+	void checkForCollision();
+	void checkForWinState();
+
+	// ui control methods
+	void pauseGame(CCObject* pSender);			/*! < main method that pauses the level and calls other methods
+												to implement pause. Called from pause button. */
+	void pauseGame();							/*! < pause method which calls method pauseGame(CCObject* pSender) with
+												NULL argument. This method used only for CCCallFunc action */
+	void pauseGameLoop(bool isPaused);			/*! < stops update method and prevents towers from touch */
+	void restartGame(CCObject* pSender);		/*! < just restart current/playing level again */
+	void nextLevel(CCObject* pSender);			/*! < restarts and changes game to the next level */
+	void levelSelectLayer(CCObject* pSender);	/*! < goes back to level select layer from game layer. From paused or won state, level select button provided as option*/ 
+	void pauseMenuItemClicked(CCObject* pSednder); 
+	void winGame();
+	/**
+	* Method that is scheduled to update (like timer) label text to a given number.
+	* Just for animation effect. 
+	*/
+	void LabelUpdateTimer(float delta); 
+	void AddStarsBasedOnPercentage(int percentage);
+	int GetNumberOfStarstFromPercentage(int percentage);
+	void AddStarsOnWinBoard(const int start_number);
+	void PlayCompletedSoundEffect();
+	
+	
+	// returns level number
+	int GetCurrentLevelNumber() const;
+	// returns next level number. Add +1 to current level
+	int GetNextLevelNumber() const;
+	// move ui elements (restart, pause button for now)
+	void moveUIElementsInDirection(UIElementsMoveDirection direction);
+	// controls touch of towers (when game is paused etc..)
+	void setTowersTouchMode(bool isTouchEnabled);
+	// remove sprites after animation ends
+	void removeSpriteFromSpriteSheet(CCNode* pSender, void* data);
+	// removes menu and items (i.e. pause menu items ....)
+	void removeObjectFromParent(CCNode* pSender, void* data);
+	/**
+	* calculates final score based on played time 
+	*/
+	int CalculateFinalScoreForTime(const float game_timer) const; 
+	/** 
+	* calculates final score in percentage where 100% means 
+	* player completed the level in 0 second and got full 
+	* final score = 4000 (actually impossible :D) 
+	* We need a percentage for "stars", where 
+	*			0=<x<=55		== *
+	*			55=<x<=75		== **
+	*			75=<x<=100		== ***
+	*/
+	int CalcualtePercentageForScore(const int final_score) const;
+	/**
+	* returns score multiplier value. For the chapter 1- 2 == 100,
+	* and for the chapter 3-4 == 10 (eg. x = game_timer * score_mult
+	*					   final_score = 2000 + (2000 - x);
+	*/
+	int GetScoreMultiplier() const;
+	/**
+	* saves all achievments of a level (time, best time, score ...)
+	* @param time a played time of a level
+	* @param score final score got in a level
+	*/
+	void SaveAchievements(const float time, const int score) const;
+	/**
+	* save level data that will unlocks next level and marks playing level
+	* as played and sets number of stars on level buttom icon
+	*/
+	void SaveLevelData();
+	
+	// helper methods
+	bool isTouchOnObject(CCTouch* touch, CCSprite* object);
+	CCPoint convertTouchToPoint(CCTouch* touch);
+
+	virtual void ccTouchesBegan(CCSet* pTouches, CCEvent* pEvent);
+	virtual void ccTouchesMoved(CCSet* pTouches, CCEvent* pEvent);
+	virtual void ccTouchesEnded(CCSet* pTouches, CCEvent* pEvent);
+
+	/////////////////////////////////////////////////////////////////////////////////
+	// 
+	/////////////////////////////////////////////////////////////////////////////////
 	static ECGameScene* instance_of_gamelayer_;
 
 	CCSize screen_size_;
@@ -110,86 +198,6 @@ private:
 								 on score and best_score labels */
 	int _gameLightsCounter;
 
-	void loadGameDataForLevel(const char* level);
-	void createTowerInQuant(const int quantity, const char* imgName, const float scale);
-	void createBuildingInQuant(const int quantity, const char* imgName, const float scale);
-	void createLines(bool isCircleClosed);
-	void resetLines();
-	void resetGameObjectsOfType(NodeType node);
-	void checkForCollision();
-	void checkForWinState();
-
-	// ui control methods
-	void pauseGame(CCObject* pSender);			/*! < main method that pauses the level and calls other methods
-												to implement pause. Called from pause button. */
-	void pauseGame();							/*! < pause method which calls method pauseGame(CCObject* pSender) with
-												NULL argument. This method used only for CCCallFunc action */
-	void pauseGameLoop(bool isPaused);			/*! < stops update method and prevents towers from touch */
-	void restartGame(CCObject* pSender);		/*! < just restart current/playing level again */
-	void nextLevel(CCObject* pSender);			/*! < restarts and changes game to the next level */
-	void levelSelectLayer(CCObject* pSender);	/*! < goes back to level select layer from game layer. From paused or won state, level select button provided as option*/ 
-	void pauseMenuItemClicked(CCObject* pSednder); 
-	void winGame();
-	/**
-	* Method that is scheduled to update (like timer) label text to a given number.
-	* Just for animation effect. 
-	*/
-	void LabelUpdateTimer(float delta); 
-	void AddStarsBasedOnPercentage(int percentage);
-	int GetNumberOfStarstFromPercentage(int percentage);
-	void AddStarsOnWinBoard(const int start_number);
-	
-	
-	// returns level number
-	int GetCurrentLevelNumber() const;
-	// returns next level number. Add +1 to current level
-	int GetNextLevelNumber() const;
-	// move ui elements (restart, pause button for now)
-	void moveUIElementsInDirection(UIElementsMoveDirection direction);
-	// controls touch of towers (when game is paused etc..)
-	void setTowersTouchMode(bool isTouchEnabled);
-	// remove sprites after animation ends
-	void removeSpriteFromSpriteSheet(CCNode* pSender, void* data);
-	// removes menu and items (i.e. pause menu items ....)
-	void removeObjectFromParent(CCNode* pSender, void* data);
-	/**
-	* calculates final score based on played time 
-	*/
-	int CalculateFinalScoreForTime(const float game_timer) const; 
-	/** 
-	* calculates final score in percentage where 100% means 
-	* player completed the level in 0 second and got full 
-	* final score = 4000 (actually impossible :D) 
-	* We need percentage for "stars", where 
-	*			0=<x<=55		== *
-	*			55=<x<=75		== **
-	*			75=<x<=100		== ***
-	*/
-	int CalcualtePercentageForScore(const int final_score) const;
-	/**
-	* returns score multiplier value. For chapter 1- 2 == 100,
-	* and for chapter 3-4 == 10 (eg. x = game_timer * score_mult
-	*					   final_score = 2000 + (2000 - x);
-	*/
-	int GetScoreMultiplier() const;
-	/**
-	* saves all achievments of a level (time, best time, score ...)
-	* @param time a played time of a level
-	* @param score final score got in a level
-	*/
-	void SaveAchievements(const float time, const int score) const;
-	/**
-	* save level data that will unlocks next level and marks playing level
-	* as played and sets number of stars on level buttom icon
-	*/
-	void SaveLevelData();
-	
-	// helper methods
-	bool isTouchOnObject(CCTouch* touch, CCSprite* object);
-	CCPoint convertTouchToPoint(CCTouch* touch);
-
-	virtual void ccTouchesBegan(CCSet* pTouches, CCEvent* pEvent);
-	virtual void ccTouchesMoved(CCSet* pTouches, CCEvent* pEvent);
-	virtual void ccTouchesEnded(CCSet* pTouches, CCEvent* pEvent);
+	ECAudioManager* audio_manager_;
 };	
 #endif// __EC_GAME_SCENE_H__
