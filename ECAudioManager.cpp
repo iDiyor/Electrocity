@@ -1,7 +1,5 @@
 #include "ECAudioManager.h"
-#include "SimpleAudioEngine.h"
-
-using namespace CocosDenshion;
+#include "ECDataProvider.h"
 
 ECAudioManager::ECAudioManager() {
 
@@ -28,21 +26,24 @@ bool ECAudioManager::init(SCENE scene) {
 		
 	  audio_manager_ = SimpleAudioEngine::sharedEngine();
 
+	  is_music_on_ = ECDataProvider::GetSettingsParameter(MUSIC_SETTING);
+	  is_sound_on_ = ECDataProvider::GetSettingsParameter(SOUND_SETTING);
+
 	  switch (scene)
 	  {
-	  case MAIN_MENU_SCENE:
+	  case MAIN_MENU_SCENE_AUDIO:
 		  {
-			  audio_manager_->preloadBackgroundMusic("music_main_menu.mp3");
-			  audio_manager_->preloadEffect("click_play.wav"); //play button click
+			  audio_manager_->preloadBackgroundMusic("audio/music_main_menu.mp3");
+			  audio_manager_->preloadEffect("audio/click_play.wav"); //play button click
 															  //sound applies to all : option, leaderboards
 		  }
 		  break;
-	  case GAME_SCENE:
+	  case GAME_SCENE_AUDIO:
 		  {
-			  audio_manager_->preloadBackgroundMusic("music_game_scene.mp3");
-			  audio_manager_->preloadEffect("click_select.wav");
-			  audio_manager_->preloadEffect("action_completed.wav");
-			  audio_manager_->preloadEffect("action_win.wav");
+			  audio_manager_->preloadBackgroundMusic("audio/music_game_scene.mp3");
+			  audio_manager_->preloadEffect("audio/click_select.wav");
+			  audio_manager_->preloadEffect("audio/action_completed.wav");
+			  audio_manager_->preloadEffect("audio/action_win.wav");
 
 		  }
 		  break;
@@ -55,19 +56,51 @@ bool ECAudioManager::init(SCENE scene) {
   return is_success;
 }
 void ECAudioManager::PlayBackgroundMusic() {
-	switch (scene_)
-	{
-	case MAIN_MENU_SCENE:
-		audio_manager_->playBackgroundMusic("music_main_menu.mp3", true);
-		break;
-	case GAME_SCENE:
-		audio_manager_->playBackgroundMusic("music_game_scene.mp3", true);
-		break;
+	if (is_music_on_) {
+		switch (scene_)
+		{
+			case MAIN_MENU_SCENE_AUDIO:
+				audio_manager_->playBackgroundMusic("audio/music_main_menu.mp3", true);
+			break;
+			case GAME_SCENE_AUDIO:
+				audio_manager_->playBackgroundMusic("audio/music_game_scene.mp3", true);
+			break;
+		}
 	}
 }
 void ECAudioManager::StopBackgroundMusic() {
-	audio_manager_->stopBackgroundMusic();
+	if (audio_manager_->isBackgroundMusicPlaying()) 
+		audio_manager_->stopBackgroundMusic();
 }
 void ECAudioManager::PlayButtonClickSound() {
-
+	if (is_sound_on_) {
+		switch (scene_)
+		{
+		case MAIN_MENU_SCENE_AUDIO:
+			audio_manager_->playEffect("audio/click_play.wav");
+			break;
+		case GAME_SCENE_AUDIO:
+			audio_manager_->playEffect("audio/click_select.wav");
+			break;
+		}
+	}
+}
+void ECAudioManager::PlayActionWinSound() {
+	if (is_sound_on_)
+		audio_manager_->playEffect("audio/action_win.wav");
+}
+void ECAudioManager::PlayActionCompletedSound() {
+	if (is_sound_on_)
+		audio_manager_->playEffect("audio/action_completed.wav");
+}
+void ECAudioManager::MusicSetting(bool is_enabled) {
+	if (!is_enabled) { // there is always bg music playing. Need to stop it when a user disables the music
+		if (audio_manager_->isBackgroundMusicPlaying())
+			this->StopBackgroundMusic();
+	}
+	//
+	ECDataProvider::SetSettingsParameter(MUSIC_SETTING, is_enabled);
+}
+void ECAudioManager::SoundSetting(bool is_enabled) {
+	ECDataProvider::SetSettingsParameter(SOUND_SETTING, is_enabled);
 }
