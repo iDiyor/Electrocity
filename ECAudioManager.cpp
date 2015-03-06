@@ -56,16 +56,17 @@ bool ECAudioManager::init(SCENE scene) {
   return is_success;
 }
 void ECAudioManager::PlayBackgroundMusic() {
-	if (is_music_on_) {
-		switch (scene_)
-		{
-			case MAIN_MENU_SCENE_AUDIO:
-				audio_manager_->playBackgroundMusic("audio/music_main_menu.mp3", true);
-			break;
-			case GAME_SCENE_AUDIO:
-				audio_manager_->playBackgroundMusic("audio/music_game_scene.mp3", true);
-			break;
-		}
+	if (!is_music_on_)
+		return;
+		
+	switch (scene_)
+	{
+		case MAIN_MENU_SCENE_AUDIO:
+			audio_manager_->playBackgroundMusic("audio/music_main_menu.mp3", true);
+		break;
+		case GAME_SCENE_AUDIO:
+			audio_manager_->playBackgroundMusic("audio/music_game_scene.mp3", true);
+		break;
 	}
 }
 void ECAudioManager::StopBackgroundMusic() {
@@ -73,16 +74,17 @@ void ECAudioManager::StopBackgroundMusic() {
 		audio_manager_->stopBackgroundMusic();
 }
 void ECAudioManager::PlayButtonClickSound() {
-	if (is_sound_on_) {
-		switch (scene_)
-		{
-		case MAIN_MENU_SCENE_AUDIO:
-			audio_manager_->playEffect("audio/click_play.wav");
-			break;
-		case GAME_SCENE_AUDIO:
-			audio_manager_->playEffect("audio/click_select.wav");
-			break;
-		}
+	if (!is_sound_on_) 
+		return;
+
+	switch (scene_)
+	{
+	case MAIN_MENU_SCENE_AUDIO:
+		audio_manager_->playEffect("audio/click_play.wav");
+		break;
+	case GAME_SCENE_AUDIO:
+		audio_manager_->playEffect("audio/click_select.wav");
+		break;
 	}
 }
 void ECAudioManager::PlayActionWinSound() {
