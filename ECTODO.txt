@@ -1,9 +1,13 @@
 // to-do list
-- Back button in level select scene (from level select scene to main menu)
-- Settings scene (Music, sound, credits, data reset)
-  + On-off lights for on-off mode of settings
-  + Trash can that resets all data
-    ++ Level 1 open other blocked (no stars on icon)
-    ++ Time played, best time, best score == 0
-    ++ 
-- 
+- Bug in collision
+  + when two lines have contact with the same one building -> win
+- Audio
+  + background music in not playing in >= Android 5.0
+- IO
+  + pugi xml parser does not save xml files in devices (android)
+  + only read mode works
+
+- and more
+-
+-
+-
