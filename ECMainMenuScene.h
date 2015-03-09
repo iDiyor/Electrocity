@@ -11,7 +11,7 @@ class ECMainMenuLayer : public CCLayer
 {
 public:
 
-	virtual bool init();
+	bool init();
 	static CCScene* scene();
 	CREATE_FUNC(ECMainMenuLayer);
 
@@ -21,7 +21,7 @@ public:
 private:
 
 	enum {
-	        T_PLAY,
+			T_PLAY,
 			T_SETTINGS,
 			T_LEADERBOARDS,
 	};
@@ -31,7 +31,7 @@ private:
 	* Play
 	* Settings
 	*/
-	void onButtonClicked(CCObject* pSender);
+	void onButtonClicked(CCObject* sender);
 
 	CCSize screen_size_;
 	ECAudioManager* audio_manager_;

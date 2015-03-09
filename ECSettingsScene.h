@@ -5,6 +5,8 @@
 
 USING_NS_CC;
 
+class ECAudioManager;
+
 class ECSettingsScene : CCLayer
 {
 public:
@@ -42,7 +44,8 @@ private:
 
 	CCSize screen_size_;
 	CCSprite* about_board_;
-	
+
+	ECAudioManager* audio_manager_;
 };
 
 #endif //_EC_SETTINGS_SCENE_H_

@@ -4,37 +4,34 @@
 #include "cocos2d.h"
 
 class ECTower;
+class ECLine;
 
 using namespace cocos2d;
 
-enum LIGHT_STATE
-{
+typedef enum {
 	LIGHT_OFF = 0,
 	LIGHT_ON
-};
-
-
-class ECLine;
+} LightState;
 
 class ECBuilding : public CCSprite
 {
 public:
 
-	static ECBuilding* createBuildingWithFileName(const std::string& fileName);
-	bool initBuildingWithFileName(const std::string& fileName);
+	static ECBuilding* CreateBuildingWithFileName(const std::string& filename);
+	bool InitBuildingWithFileName(const std::string& filename);
 
 	ECBuilding();
 	~ECBuilding();
 
-	bool checkCollisionWithLine(ECLine* line);
-	bool checkCollisionWithLine(ECTower* t1, ECTower* t2);
-	void setBuildingLight(LIGHT_STATE state);
-	int getLightState();
+	bool CheckCollisionWithLine(ECLine* line);
+	bool CheckCollisionWithLine(ECTower* tower_a, ECTower* tower_b);
+	void SetBuildingLight(LightState state);
+	int GetLightState();
 
 private:
-	std::string buildingImageFileNameForOnState;
-	std::string buildingImageFileNameForOffState;
-	int lightState;
+	std::string building_image_filename_for_on_state_;
+	std::string building_image_filename_for_off_state_;
+	int light_state_;
 };
 
 

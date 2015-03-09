@@ -2,6 +2,7 @@
 #include "ECSceneManager.h"
 #include "ECDataProvider.h"
 #include "ECDataProviderExt.h"
+#include "ECAudioManager.h"
 
 ECSettingsScene::ECSettingsScene(){
 
@@ -18,6 +19,9 @@ ECSettingsScene::~ECSettingsScene(){
 	* to prevent name collision.
 	*/
 	CCSpriteFrameCache::sharedSpriteFrameCache()->removeSpriteFramesFromFile("settings_spritesheet.plist");
+
+	delete audio_manager_;
+	audio_manager_ = NULL;
 }
 
 CCScene* ECSettingsScene::scene() {
@@ -77,6 +81,7 @@ bool ECSettingsScene::init() {
 																			NULL);
 		music_button->setPosition(ccp(screen_size_.width * 0.32f, screen_size_.height * 0.22f));
 		music_button->setTag(T_MUSIC);
+		ECDataProvider::GetSettingsParameter(MUSIC_SETTING) ? music_button->setSelectedIndex(1) : music_button->setSelectedIndex(0);
 
 		// about house
 		CCSprite* about_button_sprite = CCSprite::createWithSpriteFrameName("about.png");
@@ -103,6 +108,7 @@ bool ECSettingsScene::init() {
 																			NULL);
 		sound_button->setPosition(ccp(screen_size_.width * 0.735f, screen_size_.height * 0.268f));
 		sound_button->setTag(T_SOUND);
+		ECDataProvider::GetSettingsParameter(SOUND_SETTING) ? sound_button->setSelectedIndex(1) : sound_button->setSelectedIndex(0);
 
 		// trash can
 		CCSprite* trashcan_button_sprite = CCSprite::createWithSpriteFrameName("data_reset.png");
@@ -127,6 +133,8 @@ bool ECSettingsScene::init() {
 		menu->setPosition(ccp(0,0));
 		this->addChild(menu);
 
+		// audio manager
+		audio_manager_ = ECAudioManager::CreateAudioManagerForScene(SETTINGS_SCENE_AUDIO);
 
 		is_success = true;   
 
@@ -134,6 +142,8 @@ bool ECSettingsScene::init() {
   return is_success;
 }
 void ECSettingsScene::GoMainMenu(CCObject* sender) {
+	// audio
+	audio_manager_->PlayButtonClickSound();
 	ECSceneManager::GoMainMenuSceneWithoutLoadingScene();	
 }
 void ECSettingsScene::OnMASSettingsChanged(CCObject* sender) {
@@ -142,17 +152,38 @@ void ECSettingsScene::OnMASSettingsChanged(CCObject* sender) {
 	switch (toggle_button->getTag())
 	{
 	case T_MUSIC:
+		{
+			// audio
+			audio_manager_->PlayButtonClickSound();
+			if (toggle_button->getSelectedIndex() == 0) {
+				audio_manager_->MusicSetting(false);
+			} else {
+				audio_manager_->MusicSetting(true);
+			}
+		}
 		break;
 	case T_ABOUT:
 		this->OnAboutClicked();
 		break;
 	case T_SOUND:
+		{
+			// audio
+			audio_manager_->PlayButtonClickSound();
+			if (toggle_button->getSelectedIndex() == 0) {
+				audio_manager_->SoundSetting(false);
+			} else {
+				audio_manager_->SoundSetting(true);
+			}
+		}
 		break;
 	}
 }
 void ECSettingsScene::OnAboutClicked() {
 
 	//CCLOG("Y_POS: %.1f", about_board_->getPosition().y);
+
+	// audio
+	audio_manager_->PlayButtonClickSound();
 
 	CCMoveTo* move_animaton = NULL;
 	CCPoint current_position = about_board_->getPosition();
@@ -166,6 +197,10 @@ void ECSettingsScene::OnAboutClicked() {
 	about_board_->runAction(move_animaton);	
 }
 void ECSettingsScene::OnTrashcanClicked(CCObject* sender) {
+
+	// audio
+	audio_manager_->PlayButtonClickSound();
+
 	ECDataProviderExt* data_provider = new ECDataProviderExt("level_state.xml", "levels");
 	// first level
 	data_provider->SetPlayedAndStarsOnLevelButton("level1", false, 0);

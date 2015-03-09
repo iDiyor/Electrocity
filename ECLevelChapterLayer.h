@@ -14,8 +14,8 @@ class ECLevelChapterLayer : public CCLayer
 {
 public:
 
-	bool InitWithBackgroundImage(const char* background_img_file_name, const int page_number);
-	static ECLevelChapterLayer* CreateWithBackgroundImage(const char* background_img_file_name, const int page_number);
+	bool InitWithBackgroundImage(const char* background_img_filename, const int page_number);
+	static ECLevelChapterLayer* CreateWithBackgroundImage(const char* background_img_filename, const int page_number);
 
 	ECLevelChapterLayer();
 	~ECLevelChapterLayer();
@@ -24,7 +24,7 @@ public:
 
 	void CreateLevelSelectButtons(int row, 
 								  int col, 
-								  int numberOrderFrom, 
+								  int number_order_from, 
 								  std::vector<int>& v_open_levels,
 								  std::map<int,int>& mp_played_with_stars_buttons);
 

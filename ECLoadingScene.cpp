@@ -5,7 +5,7 @@
 #include "ECSettingsScene.h"
 
 
-CCScene* ECLoadingScene::loadingWithTargetSceneWithArgs(TARGET_SCENE targetScene, std::string& args)
+CCScene* ECLoadingScene::LoadingWithTargetSceneWithArgs(TargetScene target_scene, std::string& args)
 {
 	CCScene* scene = NULL;
 	do
@@ -13,7 +13,7 @@ CCScene* ECLoadingScene::loadingWithTargetSceneWithArgs(TARGET_SCENE targetScene
 		scene = CCScene::create();
 		CC_BREAK_IF(!scene);
 
-		ECLoadingScene* layer = ECLoadingScene::createLoadingWithTargetSceneWithArgs(targetScene, args);
+		ECLoadingScene* layer = ECLoadingScene::CreateLoadingWithTargetSceneWithArgs(target_scene, args);
 		CC_BREAK_IF(!layer);
 
 		scene->addChild(layer);
@@ -21,10 +21,10 @@ CCScene* ECLoadingScene::loadingWithTargetSceneWithArgs(TARGET_SCENE targetScene
 	}while(0);
 	return scene;
 }
-ECLoadingScene* ECLoadingScene::createLoadingWithTargetSceneWithArgs(TARGET_SCENE targetScene, std::string& args)
+ECLoadingScene* ECLoadingScene::CreateLoadingWithTargetSceneWithArgs(TargetScene target_scene, std::string& args)
 {
 	ECLoadingScene* loadingLayer = new ECLoadingScene();
-	if (loadingLayer && loadingLayer->initLoadingWithTargetSceneWithArgs(targetScene, args)) {
+	if (loadingLayer && loadingLayer->InitLoadingWithTargetSceneWithArgs(target_scene, args)) {
 		loadingLayer->autorelease();
 		return loadingLayer;
 	}
@@ -35,22 +35,22 @@ ECLoadingScene* ECLoadingScene::createLoadingWithTargetSceneWithArgs(TARGET_SCEN
 	}
 }
 
-bool ECLoadingScene::initLoadingWithTargetSceneWithArgs(TARGET_SCENE targetScene, std::string& args)
+bool ECLoadingScene::InitLoadingWithTargetSceneWithArgs(TargetScene target_scene, std::string& args)
 {
 	bool isSuccess = false;
 	do
 	{
 		CC_BREAK_IF(!CCLayer::init());
 
-		_targetScene = targetScene;
+		target_scene_ = target_scene;
 		
-		_args.append(args);
+		args_.append(args);
 
-		CCSize winSize = CCDirector::sharedDirector()->getWinSize();
+		CCSize screen_size = CCDirector::sharedDirector()->getWinSize();
 
-		CCLabelTTF* loadingLabel = CCLabelTTF::create("LOADING...", "ARIAL", 14);
-		loadingLabel->setPosition(ccp(winSize.width * 0.5f, winSize.height * 0.5f));
-		this->addChild(loadingLabel);
+		CCLabelTTF* loading_label = CCLabelTTF::create("LOADING...", "ARIAL", 14);
+		loading_label->setPosition(ccp(screen_size.width * 0.5f, screen_size.height * 0.5f));
+		this->addChild(loading_label);
 
 		this->scheduleUpdate();
 
@@ -62,10 +62,10 @@ void ECLoadingScene::update(float delta)
 {
 	this->unscheduleAllSelectors();
 
-	switch (_targetScene)
+	switch (target_scene_)
 	{
 	case TARGET_SCENE_GAME_SCENE:
-		CCDirector::sharedDirector()->replaceScene(ECGameScene::sceneWithGameLayerToLevel(_args));
+		CCDirector::sharedDirector()->replaceScene(ECGameScene::SceneWithGameLayerToLevel(args_));
 		break;
 	case TARGET_SCENE_MAIN_MENU_SCENE:
 		CCDirector::sharedDirector()->replaceScene(ECMainMenuLayer::scene());

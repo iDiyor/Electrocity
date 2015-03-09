@@ -9,6 +9,8 @@ using namespace CocosDenshion;
 
  typedef enum {
     MAIN_MENU_SCENE_AUDIO,
+	SETTINGS_SCENE_AUDIO,
+	LEVEL_SELECT_SCENE_AUDIO,
     GAME_SCENE_AUDIO,
   }SCENE;
 

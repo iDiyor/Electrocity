@@ -22,29 +22,29 @@ void ECTower::onExit()
 	CCSprite::onExit();
 }
 
-ECTower* ECTower::createTowerWithFileName(const char* fileName)
+ECTower* ECTower::CreateTowerWithFileName(const char* filename)
 {
-	ECTower* _tower = new ECTower();
-	if (_tower && _tower->initTowerWithFileName(fileName)) {
-		_tower->autorelease();
-		return _tower;
+	ECTower* tower = new ECTower();
+	if (tower && tower->InitTowerWithFileName(filename)) {
+		tower->autorelease();
+		return tower;
 	} else {
-		delete _tower;
-		_tower = NULL;
+		delete tower;
+		tower = NULL;
 		return NULL;
 	}
 }
-bool ECTower::initTowerWithFileName(const char* fileName)
+bool ECTower::InitTowerWithFileName(const char* filename)
 {
-	bool _isSuccess = false;
+	bool is_success = false;
 	do
 	{
-		CC_BREAK_IF(!CCSprite::initWithSpriteFrameName(fileName));
+		CC_BREAK_IF(!CCSprite::initWithSpriteFrameName(filename));
 
 
-		_isSuccess = true;
+		is_success = true;
 	}while (0);
-	return _isSuccess;
+	return is_success;
 }
 void ECTower::setPosition(const CCPoint& position)
 {
@@ -69,7 +69,7 @@ void ECTower::setPosition(const CCPoint& position)
 	}
 	CCSprite::setPosition(updatedPosition);
 }
-bool ECTower::isTouchOnMe(const CCTouch* touch)
+bool ECTower::IsTouchOnMe(const CCTouch* touch)
 {
 	CCPoint touchPoint = touch->getLocationInView();
 	touchPoint = CCDirector::sharedDirector()->convertToGL(touchPoint);
@@ -79,39 +79,39 @@ bool ECTower::isTouchOnMe(const CCTouch* touch)
 	}
 	return false;
 }
-void ECTower::playDustAnimation()
+void ECTower::PlayDustAnimation()
 {
 	CCLOG("DUST_ANIM");
 }
-int ECTower::getTowerState()
+int ECTower::GetTowerState() const
 {
-	return towerState;
+	return tower_state_;
 }
 bool ECTower::ccTouchBegan(CCTouch* pTouch, CCEvent* pEvent)
 {
-	CCPoint touchPoint = CCDirector::sharedDirector()->convertToGL(pTouch->getLocationInView());
-	bool isContainsPoint = this->boundingBox().containsPoint(touchPoint);
+	CCPoint touch_point = CCDirector::sharedDirector()->convertToGL(pTouch->getLocationInView());
+	bool is_contains_point = this->boundingBox().containsPoint(touch_point);
 
-	if (isContainsPoint) 
+	if (is_contains_point) 
 	{
-		_prevPosition = touchPoint;
-		towerState = ON_TOWER_BEGIN;
+		prev_position_ = touch_point;
+		tower_state_ = ON_TOWER_BEGIN;
 	}
-	return isContainsPoint;
+	return is_contains_point;
 }
 void ECTower::ccTouchMoved(CCTouch* pTouch, CCEvent* pEvent)
 {
-	CCPoint touchPoint = CCDirector::sharedDirector()->convertToGL(pTouch->getLocationInView());
-	CCPoint moveTo = ccpSub(touchPoint, _prevPosition);
+	CCPoint touch_point = CCDirector::sharedDirector()->convertToGL(pTouch->getLocationInView());
+	CCPoint move_to = ccpSub(touch_point, prev_position_);
 
-	this->setPosition(ccpAdd(this->getPosition(), moveTo));
-	_prevPosition = touchPoint;
+	this->setPosition(ccpAdd(this->getPosition(), move_to));
+	prev_position_ = touch_point;
 
-	towerState = ON_TOWER_MOVED;
+	tower_state_ = ON_TOWER_MOVED;
 }
 void ECTower::ccTouchEnded(CCTouch* pTouch, CCEvent* pEvent)
 {
-	towerState = ON_TOWER_ENDED;
+	tower_state_ = ON_TOWER_ENDED;
 }
 void ECTower::touchDelegateRetain()
 {

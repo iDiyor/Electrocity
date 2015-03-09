@@ -14,15 +14,15 @@ typedef enum
 	TARGET_SCENE_LEVEL_SELECT_SCENE,
 	TARGET_SCENE_SETTINGS_SCENE,
 
-}TARGET_SCENE;
+}TargetScene;
 
 class ECLoadingScene : public CCLayer
 {
 public:
 
-	static CCScene* loadingWithTargetSceneWithArgs(TARGET_SCENE targetScene, std::string& args);
-	static ECLoadingScene* createLoadingWithTargetSceneWithArgs(TARGET_SCENE targetScene, std::string& args);
-	bool initLoadingWithTargetSceneWithArgs(TARGET_SCENE targetScene, std::string& args);
+	static CCScene* LoadingWithTargetSceneWithArgs(TargetScene target_scene, std::string& args);
+	static ECLoadingScene* CreateLoadingWithTargetSceneWithArgs(TargetScene target_scene, std::string& args);
+	bool InitLoadingWithTargetSceneWithArgs(TargetScene target_scene, std::string& args);
 
 	//static CCScene* loadingWithTargetScene(TARGET_SCENE targetScene);
 	//static ECLoadingScene* createLoadingWithTargetScene(TARGET_SCENE targetScene);
@@ -31,7 +31,7 @@ public:
 	virtual void update(float delta);
 
 private:
-	TARGET_SCENE _targetScene;
-	std::string _args;
+	TargetScene target_scene_;
+	std::string args_;
 };
 #endif //__EC_LOADING_SCENE_H__

@@ -13,19 +13,19 @@ class ECAudioManager;
 class ECGameScene : public CCLayer
 {
 public:
-	static CCScene* sceneWithGameLayerToLevel(std::string& level);
-	static ECGameScene* createGameLayerToLevel(std::string& level);
-	static ECGameScene* sharedGameLayer();
-	bool initGameLayerToLayer(std::string& level);
+	static CCScene* SceneWithGameLayerToLevel(std::string& level);
+	static ECGameScene* CreateGameLayerToLevel(std::string& level);
+	static ECGameScene* SharedGameLayer();
+	bool InitGameLayerToLayer(std::string& level);
 
 	ECGameScene();
-	virtual ~ECGameScene();
+	~ECGameScene();
 
-	virtual void update(float delta);
+	void update(float delta);
 	
 private:
 
-	enum ScreenLayersZOrder {
+	typedef enum {
 		Z_BACKGROUND = 50,
 		Z_BUILDING,
 		Z_TOWERS,
@@ -37,7 +37,7 @@ private:
 		// win
 		Z_WIN_INFO_BOARD,
 		Z_WIN_RESULT_INFO_LABEL
-	};
+	}ScreenLayersZOrder ;
 
 
 	// menu appears when pause button is clicked
@@ -45,16 +45,16 @@ private:
 	// |-----SKIP LEVEL-----|
 	// |-----LEVEL SELECT---|
 	// |-----MAIN MENU------|
-	enum PauseMenuItemsTag {
+	typedef enum {
 		T_CONTINUE = 100,
 		T_SKIP_LEVEL,
 		T_SELECT_LEVEL,
 		T_MAIN_MENU
-	};
+	}PauseMenuItemsTag;
 
 	// elements that added to main scene and called from different methods to animation effects
 	// instead of making elements global fields -> accessed by tags
-	enum UIElementsTag {
+	typedef enum {
 		//labels
 		T_LEVEL_TIME_LABEL = 200,
 		T_LEVEL_BEST_TIME_LABEL,
@@ -69,7 +69,7 @@ private:
 		// win
 		T_WIN_SHADE_BACKGROUND_LAYER,
 		T_WIN_INFO_BOARD
-	};
+	} UIElementsTag;
 
 	// move UI elements down/up
 	typedef enum {
@@ -78,26 +78,26 @@ private:
 	} UIElementsMoveDirection;
 
 
-	void loadGameDataForLevel(const char* level);
-	void createTowerInQuant(const int quantity, const char* imgName, const float scale);
-	void createBuildingInQuant(const int quantity, const char* imgName, const float scale);
-	void createLines(bool isCircleClosed);
-	void resetLines();
-	void resetGameObjectsOfType(NodeType node);
-	void checkForCollision();
-	void checkForWinState();
+	void LoadGameDataForLevel(const char* level);
+	void CreateTowerInQuant(const int quantity, const char* image_filename, const float scale);
+	void CreateBuildingInQuant(const int quantity, const char* image_filename, const float scale);
+	void CreateLines(bool is_lines_loop);
+	void ResetLines();
+	void ResetGameObjectsOfType(NodeType node_type);
+	void CheckForCollision();
+	void CheckForWinState();
 
 	// ui control methods
-	void pauseGame(CCObject* pSender);			/*! < main method that pauses the level and calls other methods
+	void PauseGame(CCObject* pSender);			/*! < main method that pauses the level and calls other methods
 												to implement pause. Called from pause button. */
-	void pauseGame();							/*! < pause method which calls method pauseGame(CCObject* pSender) with
+	void PauseGame();							/*! < pause method which calls method pauseGame(CCObject* pSender) with
 												NULL argument. This method used only for CCCallFunc action */
-	void pauseGameLoop(bool isPaused);			/*! < stops update method and prevents towers from touch */
-	void restartGame(CCObject* pSender);		/*! < just restart current/playing level again */
-	void nextLevel(CCObject* pSender);			/*! < restarts and changes game to the next level */
-	void levelSelectLayer(CCObject* pSender);	/*! < goes back to level select layer from game layer. From paused or won state, level select button provided as option*/ 
-	void pauseMenuItemClicked(CCObject* pSednder); 
-	void winGame();
+	void PauseGameLoop(bool is_paused);			/*! < stops update method and prevents towers from touch */
+	void RestartGame(CCObject* pSender);		/*! < just restart current/playing level again */
+	void NextLevel(CCObject* pSender);			/*! < restarts and changes game to the next level */
+	void LevelSelectLayer(CCObject* pSender);	/*! < goes back to level select layer from game layer. From paused or won state, level select button provided as option*/ 
+	void PauseMenuItemClicked(CCObject* pSednder); 
+	void WinGame();
 	/**
 	* Method that is scheduled to update (like timer) label text to a given number.
 	* Just for animation effect. 
@@ -114,13 +114,13 @@ private:
 	// returns next level number. Add +1 to current level
 	int GetNextLevelNumber() const;
 	// move ui elements (restart, pause button for now)
-	void moveUIElementsInDirection(UIElementsMoveDirection direction);
+	void MoveUIElementsInDirection(UIElementsMoveDirection direction);
 	// controls touch of towers (when game is paused etc..)
-	void setTowersTouchMode(bool isTouchEnabled);
+	void SetTowersTouchMode(bool is_touch_enabled);
 	// remove sprites after animation ends
-	void removeSpriteFromSpriteSheet(CCNode* pSender, void* data);
+	void RemoveSpriteFromSpriteSheet(CCNode* sender, void* data);
 	// removes menu and items (i.e. pause menu items ....)
-	void removeObjectFromParent(CCNode* pSender, void* data);
+	void RemoveObjectFromParent(CCNode* sender, void* data);
 	/**
 	* calculates final score based on played time 
 	*/
@@ -154,8 +154,8 @@ private:
 	void SaveLevelData();
 	
 	// helper methods
-	bool isTouchOnObject(CCTouch* touch, CCSprite* object);
-	CCPoint convertTouchToPoint(CCTouch* touch);
+	bool IsTouchOnObject(CCTouch* touch, CCSprite* object);
+	CCPoint ConvertTouchToPoint(CCTouch* touch);
 
 	virtual void ccTouchesBegan(CCSet* pTouches, CCEvent* pEvent);
 	virtual void ccTouchesMoved(CCSet* pTouches, CCEvent* pEvent);
@@ -168,7 +168,7 @@ private:
 
 	CCSize screen_size_;
 
-	// vectors - arrays
+	// collections - vectors
 	std::vector<CCSprite*> towers_;					/*!< vector container that stores all the towers in a level */
 	std::vector<CCSprite*> buildings_;				/*!< vector container that stores all the buildings(houses) in a level */
 	std::vector<CCSprite*> lines_;					/*!< vector container that stores all the lines connected to towers in a level */
@@ -183,7 +183,7 @@ private:
 	// string object representing a current level of the game
 	std::string current_level_;
 	// game timer fields
-	float _gameTimer;
+	float game_timer_;
 	/** 
 	* variable that is assigned to final score of a level in win state and 
 	* is intended for using in LabelUpdateTimer method, where temp_game_score_ is updated until it equals or
@@ -191,12 +191,12 @@ private:
 	*/
 	float final_game_score_;	
 	/**
-	* temp variable
+	* temp variables
 	*/
 	float temp_final_game_score_;
-	CCLabelBMFont* temp_label_;  /*! < temporary label that used in LabelUpdateTimer method to create timer like effect (animation only)
+	CCLabelBMFont* temp_label_;  /*! < a temporary label that used in LabelUpdateTimer method to create timer like effect (animation only)
 								 on score and best_score labels */
-	int _gameLightsCounter;
+	int game_on_light_counter_;
 
 	ECAudioManager* audio_manager_;
 };	

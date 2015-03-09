@@ -6,10 +6,10 @@
 USING_NS_CC;
 
 // settings (global)
-	typedef enum {
-		MUSIC_SETTING,
-		SOUND_SETTING,
-	}SettingsParameter;
+typedef enum {
+	MUSIC_SETTING,
+	SOUND_SETTING,
+}SettingsParameter;
 
 class ECDataProvider {
 public:

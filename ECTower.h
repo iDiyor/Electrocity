@@ -5,18 +5,18 @@
 
 using namespace cocos2d;
 
-enum TOWER_STATE {
+typedef enum  {
 	ON_TOWER_BEGIN = 101,
 	ON_TOWER_MOVED,
 	ON_TOWER_ENDED
-};
+}TowerState;
 
 class ECTower : public CCSprite, public CCTargetedTouchDelegate
 {
 public:
 
-	static ECTower* createTowerWithFileName(const char* fileName);
-	bool initTowerWithFileName(const char* fileName);
+	static ECTower* CreateTowerWithFileName(const char* filename);
+	bool InitTowerWithFileName(const char* filename);
 
 
 	ECTower();
@@ -25,13 +25,12 @@ public:
 	virtual void onEnter();
 	virtual void onExit();
 
-	bool isTouchOnMe(const CCTouch* touch);
-	void playDustAnimation();
+	bool IsTouchOnMe(const CCTouch* touch);
+	void PlayDustAnimation();
 
-	int getTowerState();
+	int GetTowerState() const;
 
-
-	virtual void setPosition(const CCPoint& position);
+	void setPosition(const CCPoint& position);
 
 	virtual bool ccTouchBegan(CCTouch* pTouch, CCEvent* pEvent);
 	virtual void ccTouchMoved(CCTouch* pTouch, CCEvent* pEvent);
@@ -41,7 +40,7 @@ public:
 	virtual void touchDelegateRelease();
 
 private:
-	CCPoint _prevPosition;
-	TOWER_STATE towerState;
+	CCPoint prev_position_;
+	TowerState tower_state_;
 };
 #endif //__EC_TOWER_H__

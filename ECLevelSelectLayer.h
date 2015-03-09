@@ -7,12 +7,14 @@
 using namespace cocos2d;
 using namespace cocos2d::extension;
 
+class ECAudioManager;
+
 class ECLevelSelectLayer : public CCLayer
 {
 public:
 
 	static CCScene* scene();
-	virtual bool init();
+	bool init();
 
 	CREATE_FUNC(ECLevelSelectLayer);
 
@@ -26,10 +28,11 @@ public:
 
 private:
 
-	CCSize screen_size_;
-
-	CCScrollView* scroll_view_;
-
 	void GoMainMenu(CCObject* sender);
+
+	CCSize screen_size_;
+	CCScrollView* scroll_view_;
+	ECAudioManager* audio_manager_;
+	
 };
 #endif //__EC_LEVEL_SELECT_LAYER__

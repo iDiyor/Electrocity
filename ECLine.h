@@ -16,12 +16,12 @@ public:
 	ECLine();
 	~ECLine();
 	
-	void resetLineBetweenTowers(ECTower* towerA, ECTower* towerB);
+	void ResetLineBetweenTowers(ECTower* towerA, ECTower* towerB);
 
-	const CCPoint& getLineEndPoint();
+	const CCPoint& GetLineEndPoint();
 private:
 
 	//CCPoint _beginLinePoint;
-	CCPoint _endLinePoint;
+	CCPoint line_end_point_;
 };
 #endif //__EC_LINE_H__

@@ -38,13 +38,20 @@ bool ECAudioManager::init(SCENE scene) {
 															  //sound applies to all : option, leaderboards
 		  }
 		  break;
+	  case SETTINGS_SCENE_AUDIO:	// settings audio management is temporary solution until best approach is found (singleton)
+		  //audio_manager_->preloadBackgroundMusic("audio/music_main_menu.mp3"); 
+		  break;
+	  case LEVEL_SELECT_SCENE_AUDIO:
+		  break;
 	  case GAME_SCENE_AUDIO:
 		  {
+			  // I have no idea whether I need to unload this or not
+			  audio_manager_->unloadEffect("audio/click_play.wav");
+
 			  audio_manager_->preloadBackgroundMusic("audio/music_game_scene.mp3");
 			  audio_manager_->preloadEffect("audio/click_select.wav");
 			  audio_manager_->preloadEffect("audio/action_completed.wav");
 			  audio_manager_->preloadEffect("audio/action_win.wav");
-
 		  }
 		  break;
 	  }
@@ -58,11 +65,17 @@ bool ECAudioManager::init(SCENE scene) {
 void ECAudioManager::PlayBackgroundMusic() {
 	if (!is_music_on_)
 		return;
-		
+
+	CCLOG("PLAY");
 	switch (scene_)
 	{
 		case MAIN_MENU_SCENE_AUDIO:
 			audio_manager_->playBackgroundMusic("audio/music_main_menu.mp3", true);
+		break;
+		case SETTINGS_SCENE_AUDIO:
+			audio_manager_->playBackgroundMusic("audio/music_main_menu.mp3", true);
+		break;
+		case LEVEL_SELECT_SCENE_AUDIO:
 		break;
 		case GAME_SCENE_AUDIO:
 			audio_manager_->playBackgroundMusic("audio/music_game_scene.mp3", true);
@@ -82,6 +95,12 @@ void ECAudioManager::PlayButtonClickSound() {
 	case MAIN_MENU_SCENE_AUDIO:
 		audio_manager_->playEffect("audio/click_play.wav");
 		break;
+	case SETTINGS_SCENE_AUDIO:
+		audio_manager_->playEffect("audio/click_select.wav");
+	break;
+	case LEVEL_SELECT_SCENE_AUDIO:
+		audio_manager_->playEffect("audio/click_select.wav");
+	break;
 	case GAME_SCENE_AUDIO:
 		audio_manager_->playEffect("audio/click_select.wav");
 		break;
@@ -96,13 +115,22 @@ void ECAudioManager::PlayActionCompletedSound() {
 		audio_manager_->playEffect("audio/action_completed.wav");
 }
 void ECAudioManager::MusicSetting(bool is_enabled) {
+	// for an instant change
+	is_music_on_ = is_enabled;
+
 	if (!is_enabled) { // there is always bg music playing. Need to stop it when a user disables the music
-		if (audio_manager_->isBackgroundMusicPlaying())
-			this->StopBackgroundMusic();
+		CCLOG("STOP");
+		this->StopBackgroundMusic();
+	} else {
+		CCLOG("RESUME");
+		this->PlayBackgroundMusic();
 	}
-	//
+
+	
+	// xml
 	ECDataProvider::SetSettingsParameter(MUSIC_SETTING, is_enabled);
 }
 void ECAudioManager::SoundSetting(bool is_enabled) {
+	is_sound_on_ = is_enabled;
 	ECDataProvider::SetSettingsParameter(SOUND_SETTING, is_enabled);
 }

@@ -3,7 +3,7 @@
 
 USING_NS_CC;
 
-ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::string& parent, const std::string& child_node)
+ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::string& parent_node, const std::string& child_node)
 {
 	// method #1
 	//std::string filePath = CCFileUtils::sharedFileUtils()->fullPathForFilename(fileName.c_str());
@@ -20,13 +20,13 @@ ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::st
 	if (result) {
 		CCLOG("%s : Loaded successfully: %s", file_name.c_str(), result.description());
 		// assining loaded level and finding selected level data
-		level_data_ = doc_file_.child(parent.c_str()).child(child_node.c_str());
+		level_data_ = doc_file_.child(parent_node.c_str()).child(child_node.c_str());
 		file_name_ = file_name;
 	} else {
 		CCLOG("%s : Error description: %s" , file_name.c_str() ,result.description());
 	}
 }
-ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::string& parent)
+ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::string& parent_node)
 {
 	// method #1
 	//std::string filePath = CCFileUtils::sharedFileUtils()->fullPathForFilename(fileName.c_str());
@@ -36,14 +36,14 @@ ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::st
 	std::string fullFilePath = CCFileUtils::sharedFileUtils()->fullPathForFilename(file_name.c_str());
 	unsigned char* pBuffer = NULL;
 	unsigned long bufferSize = 0;
-	pBuffer = CCFileUtils::sharedFileUtils()->getFileData(fullFilePath.c_str(), "r", &bufferSize);
+	pBuffer = CCFileUtils::sharedFileUtils()->getFileData(fullFilePath.c_str(), "r+", &bufferSize);
 	
 	xml_parse_result result = doc_file_.load_buffer(pBuffer, bufferSize);
 	
 	if (result) {
 		CCLOG("%s : Loaded successfully: %s", file_name.c_str(), result.description());
 		// assining loaded level and finding selected level data
-		level_data_ = doc_file_.child(parent.c_str());
+		level_data_ = doc_file_.child(parent_node.c_str());
 		file_name_ = file_name;
 	} else {
 		CCLOG("%s : Error description: %s" , file_name.c_str() ,result.description());
@@ -54,9 +54,13 @@ ECDataProviderExt::~ECDataProviderExt()
 
 }
 void ECDataProviderExt::SaveFile() {
-	doc_file_.save_file(file_name_.c_str());
+	std::string fullFilePath = CCFileUtils::sharedFileUtils()->fullPathForFilename(file_name_.c_str());
+	//CCLOG("PATH: %s", fullFilePath.c_str());
+	int n = level_data_.child("level2").attribute("number_of_stars").as_int();
+	CCLOG("STARS_NUMBER: %i", n);
+	doc_file_.save_file(fullFilePath.c_str());
 }
-void ECDataProviderExt::loadPositionXYOfBuildings(std::vector<CCPoint>& destVector)
+void ECDataProviderExt::LoadPositionXYOfBuildings(std::vector<CCPoint>& dest_vector)
 {
 	xml_node buildings = level_data_.child("buildings");
 	for (xml_node_iterator it = buildings.begin(); it != buildings.end(); ++it)
@@ -64,10 +68,10 @@ void ECDataProviderExt::loadPositionXYOfBuildings(std::vector<CCPoint>& destVect
 			float positionX = it->attribute("pos_x").as_float();
 			float positionY = it->attribute("pos_y").as_float();
 			CCPoint loadedPosToPush = ccp(positionX, positionY);
-			destVector.push_back(loadedPosToPush);
+			dest_vector.push_back(loadedPosToPush);
 		}
 }
-void ECDataProviderExt::loadPositionXYOfTowers(std::vector<CCPoint>& destVector)
+void ECDataProviderExt::LoadPositionXYOfTowers(std::vector<CCPoint>& dest_vector)
 {
 	xml_node towers = level_data_.child("towers");
 	for (xml_node_iterator it = towers.begin(); it != towers.end(); ++it)
@@ -75,19 +79,19 @@ void ECDataProviderExt::loadPositionXYOfTowers(std::vector<CCPoint>& destVector)
 			float positionX = it->attribute("pos_x").as_float();
 			float positionY = it->attribute("pos_y").as_float();
 			CCPoint loadedPosToPush = ccp(positionX, positionY);
-			destVector.push_back(loadedPosToPush);
+			dest_vector.push_back(loadedPosToPush);
 		}
 }
-void ECDataProviderExt::loadNodeAttributesForNodeType(NodeType nodeType, int* imageFileNumber, int* amount, float* scale)
+void ECDataProviderExt::LoadNodeAttributesForNodeType(NodeType node_type, int* image_file_number, int* quantity, float* scale)
 {
 	xml_node node;
 
-	switch (nodeType)	
+	switch (node_type)	
 	{
-	case kBuilding:
+	case TYPE_BUILDING:
 		node = level_data_.child("buildings");
 		break;
-	case kTower:
+	case TYPE_TOWER:
 		node = level_data_.child("towers");
 		break;
 	}
@@ -98,12 +102,12 @@ void ECDataProviderExt::loadNodeAttributesForNodeType(NodeType nodeType, int* im
 			//std::string key = it->name();	//atributues key names
 			//int value		= it->as_int(); //attributes key values
 			//destMap.insert(std::pair<std::string,int>(key, value));
-			*imageFileNumber = node.attribute("image_file_number").as_int();
-			*amount			= node.attribute("quantity").as_int();
-			*scale			= node.attribute("scale").as_float();
+			*image_file_number  = node.attribute("image_file_number").as_int();
+			*quantity			= node.attribute("quantity").as_int();
+			*scale				= node.attribute("scale").as_float();
 		}
 }
-bool ECDataProviderExt::loadLinesLoopAttribute()
+bool ECDataProviderExt::LoadLinesLoopAttribute()
 {
 	xml_node lines = level_data_.child("lines");
 	return lines.attribute("loop_closed").as_bool();
@@ -120,6 +124,7 @@ void ECDataProviderExt::LoadDataForLevelSelectButtons(std::vector<int>& v_open_b
 		bool is_level_blocked = it->attribute("is_blocked").as_bool();
 		bool is_level_played = it->attribute("is_played").as_bool();
 		int	number_of_stars = it->attribute("number_of_stars").as_int();
+		CCLOG("NUMBER_OF_STARS: %i", number_of_stars);
 		// open levels others by default are blocked		
 		if (!is_level_blocked) {
 			v_open_buttons.push_back(count);

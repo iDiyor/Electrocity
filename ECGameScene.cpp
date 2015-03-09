@@ -21,8 +21,8 @@ ECGameScene::ECGameScene() :
 	game_layer_spritesheet_(NULL),
 	game_level_data_(NULL),
 	current_level_(""),
-	_gameTimer(0),
-	_gameLightsCounter(0),
+	game_timer_(0),
+	game_on_light_counter_(0),
 	temp_label_(NULL),
 	temp_final_game_score_(0)
 {
@@ -40,7 +40,7 @@ ECGameScene::~ECGameScene()
 	delete audio_manager_;
 	audio_manager_ = NULL;
 }
-CCScene* ECGameScene::sceneWithGameLayerToLevel(std::string& level)
+CCScene* ECGameScene::SceneWithGameLayerToLevel(std::string& level)
 {
 	CCScene* _scene = NULL;
 	do
@@ -48,17 +48,17 @@ CCScene* ECGameScene::sceneWithGameLayerToLevel(std::string& level)
 		_scene = CCScene::create();
 		CC_BREAK_IF(!_scene);
 
-		ECGameScene* _layer = ECGameScene::createGameLayerToLevel(level);
+		ECGameScene* _layer = ECGameScene::CreateGameLayerToLevel(level);
 		CC_BREAK_IF(!_layer);
 
 		_scene->addChild(_layer);
 	}while (0);
 	return _scene;
 }
-ECGameScene* ECGameScene::createGameLayerToLevel(std::string& level)
+ECGameScene* ECGameScene::CreateGameLayerToLevel(std::string& level)
 {
 	ECGameScene* gameLayer = new ECGameScene();
-	if (gameLayer && gameLayer->initGameLayerToLayer(level))
+	if (gameLayer && gameLayer->InitGameLayerToLayer(level))
 	{
 		gameLayer->autorelease();
 		return gameLayer;
@@ -71,12 +71,12 @@ ECGameScene* ECGameScene::createGameLayerToLevel(std::string& level)
 	}
 }
 ECGameScene* ECGameScene::instance_of_gamelayer_ = NULL;
-ECGameScene* ECGameScene::sharedGameLayer()
+ECGameScene* ECGameScene::SharedGameLayer()
 {
 	CC_ASSERT(instance_of_gamelayer_);
 	return instance_of_gamelayer_;
 }
-bool ECGameScene::initGameLayerToLayer(std::string& level)
+bool ECGameScene::InitGameLayerToLayer(std::string& level)
 {
 	bool _isSuccess = false;
 	do
@@ -107,7 +107,7 @@ bool ECGameScene::initGameLayerToLayer(std::string& level)
 																	 gamePauseButtonSpriteSelected,
 																	 NULL,
 																	 this,
-																	 menu_selector(ECGameScene::pauseGame));
+																	 menu_selector(ECGameScene::PauseGame));
 		gamePauseButton->setPosition(ccp(screen_size_.width - gamePauseButton->getContentSize().width * 0.5f - 2,
 										 screen_size_.height - gamePauseButton->getContentSize().height * 0.5f - 2));
 
@@ -118,7 +118,7 @@ bool ECGameScene::initGameLayerToLayer(std::string& level)
 																	   gameRestartButtonSpriteSelected,
 																	   NULL,
 																	   this,
-																	   menu_selector(ECGameScene::restartGame));
+																	   menu_selector(ECGameScene::RestartGame));
 		gameRestartButton->setPosition(ccp(gamePauseButton->getPosition().x - gameRestartButton->getContentSize().width - 5,
 										   gamePauseButton->getPosition().y));
 
@@ -130,7 +130,7 @@ bool ECGameScene::initGameLayerToLayer(std::string& level)
 		// loading level data
 		game_level_data_ = new ECDataProviderExt("data4.xml", "levels" ,level);
 		// set up level
-		this->loadGameDataForLevel(level.c_str());
+		this->LoadGameDataForLevel(level.c_str());
 		// seting current level
 		current_level_.assign(level);
 
@@ -183,146 +183,150 @@ void ECGameScene::update(float delta)
 		ECTower* tower = static_cast<ECTower*>(towers_.at(i));
 		if (tower->getTowerState() == ON_TOWER_MOVED || tower->getTowerState() == ON_TOWER_ENDED)
 		{
-			this->resetLines();
-			this->checkForCollision();
+			this->ResetLines();
+			this->CheckForCollision();
 		}
 	}
 
 	// check for win state
-	this->checkForWinState();
+	this->CheckForWinState();
 
 	// timer, updating game timer label
-	_gameTimer += delta;
+	game_timer_ += delta;
 	CCLabelBMFont* gameTimerLabel = (CCLabelBMFont*)this->getChildByTag(T_LEVEL_TIME_LABEL);
-	gameTimerLabel->setString(CCString::createWithFormat("Time: %.1f", _gameTimer)->getCString());
+	gameTimerLabel->setString(CCString::createWithFormat("Time: %.1f", game_timer_)->getCString());
 
 }
-void ECGameScene::loadGameDataForLevel(const char* level)
+void ECGameScene::LoadGameDataForLevel(const char* level)
 {
 	//load specific node(building,tower) attributes -> call methods with args
-	std::map<std::string, int> nodeAttributes;
+	std::map<std::string, int> mp_node_attributes;
 
 	//variables for each attributes
-	char imageFileName[20];
-	int nodeImageNumber = 0;
-	int nodeQuantity	= 0;
-	float nodeScale		= 0;
+	char image_filename[20];
+	int node_attribute_image_number = 0;
+	int node_attribute_quantity		= 0;
+	float node_attribute_scale		= 0;
 
 	// loading building attributes | assigning attributes
-	game_level_data_->loadNodeAttributesForNodeType(kBuilding, &nodeImageNumber, &nodeQuantity, &nodeScale);
+	game_level_data_->LoadNodeAttributesForNodeType(TYPE_BUILDING, &node_attribute_image_number, 
+																   &node_attribute_quantity, 
+																   &node_attribute_scale);
 	// building full image file name with sprite number
-	std::sprintf(imageFileName, "house_off_%i.png", nodeImageNumber);
+	std::sprintf(image_filename, "house_off_%i.png", node_attribute_image_number);
 	//creating buildings according to attributes
-	this->createBuildingInQuant(nodeQuantity, imageFileName, nodeScale);
+	this->CreateBuildingInQuant(node_attribute_quantity, image_filename, node_attribute_scale);
 
 	//clear for next use
-	nodeAttributes.clear();
+	mp_node_attributes.clear();
 
 	// loading towers attributes | assigning attributes
-	game_level_data_->loadNodeAttributesForNodeType(kTower, &nodeImageNumber, &nodeQuantity, &nodeScale);
+	game_level_data_->LoadNodeAttributesForNodeType(TYPE_TOWER, &node_attribute_image_number, 
+																&node_attribute_quantity, 
+																&node_attribute_scale);
 	// building full image file name with sprite number
-	std::sprintf(imageFileName, "tower_%i.png", nodeImageNumber);
+	std::sprintf(image_filename, "tower_%i.png", node_attribute_image_number);
 	//creating buildings according to attributes
-	this->createTowerInQuant(nodeQuantity, imageFileName, nodeScale);
+	this->CreateTowerInQuant(node_attribute_quantity, image_filename, node_attribute_scale);
 
 	//creating lines
-	bool islinesCircleClosed = game_level_data_->loadLinesLoopAttribute();
-	this->createLines(islinesCircleClosed);
+	bool is_lines_loop = game_level_data_->LoadLinesLoopAttribute();
+	this->CreateLines(is_lines_loop);
 
 	//clear for next use
-	nodeAttributes.clear();
+	mp_node_attributes.clear();
 }
-void ECGameScene::createTowerInQuant(const int amount, const char* imgName, const float scale)
+void ECGameScene::CreateTowerInQuant(const int quantity, const char* image_filename, const float scale)
 {
-	for (unsigned int i = 0; i < amount; i++)
+	for (unsigned int i = 0; i < quantity; i++)
 	{
-		ECTower* tower = ECTower::createTowerWithFileName(imgName);
+		ECTower* tower = ECTower::createTowerWithFileName(image_filename);
 		tower->setScale(scale);
 		game_layer_spritesheet_->addChild(tower, Z_TOWERS);
 		towers_.push_back(tower);
 	}
-	this->resetGameObjectsOfType(kTower);
+	this->ResetGameObjectsOfType(TYPE_TOWER);
 }
-void ECGameScene::createBuildingInQuant(const int amount, const char* imgName, const float scale)
+void ECGameScene::CreateBuildingInQuant(const int quantity, const char* image_filename, const float scale)
 {
-	for (unsigned int i = 0; i < amount; i++)
+	for (unsigned int i = 0; i < quantity; i++)
 	{
-		ECBuilding* building = ECBuilding::createBuildingWithFileName(imgName);
+		ECBuilding* building = ECBuilding::CreateBuildingWithFileName(image_filename);
 		building->setScale(scale);
 		game_layer_spritesheet_->addChild(building, Z_BUILDING);
 		buildings_.push_back(building);
 	}
-	this->resetGameObjectsOfType(kBuilding);
+	this->ResetGameObjectsOfType(TYPE_BUILDING);
 }
-void ECGameScene::resetGameObjectsOfType(NodeType node)
+void ECGameScene::ResetGameObjectsOfType(NodeType node)
 {
-	std::vector<CCPoint>	nodePositions;
-	std::vector<CCSprite*>	nodesArray;
+	std::vector<CCPoint>	v_node_positions;
+	std::vector<CCSprite*>	v_nodes;
 
 	switch (node)
 	{
-	case kBuilding:
+	case TYPE_BUILDING:
 		{
-			game_level_data_->loadPositionXYOfBuildings(nodePositions);
-			nodesArray = buildings_;
+			game_level_data_->LoadPositionXYOfBuildings(v_node_positions);
+			v_nodes = buildings_;
 		}
 		break;
-	case kTower:
+	case TYPE_TOWER:
 		{
-			game_level_data_->loadPositionXYOfTowers(nodePositions);
-			nodesArray = towers_;
+			game_level_data_->LoadPositionXYOfTowers(v_node_positions);
+			v_nodes = towers_;
 		}
 		break;
 	}
 
 	// loop pos and node
-	for (unsigned int i = 0; i < nodesArray.size(); i++)
+	for (unsigned int i = 0; i < v_nodes.size(); i++)
 	{
-		CCSprite* node = dynamic_cast<CCSprite*>(nodesArray.at(i));
-		CCPoint positionToSet = (CCPoint)nodePositions.at(i);
+		CCSprite* node = dynamic_cast<CCSprite*>(v_nodes.at(i));
+		CCPoint positionToSet = (CCPoint)v_node_positions.at(i);
 		node->setPosition(positionToSet);
 	}
 
-	nodePositions.clear();
-	nodesArray.clear();
+	v_node_positions.clear();
+	v_nodes.clear();
 }
-void ECGameScene::createLines(bool isCircleClosed)
+void ECGameScene::CreateLines(bool is_lines_loop)
 {
-	int linesQuantity = 0;
-	if (!isCircleClosed) {
-		linesQuantity = towers_.size() - 1;
+	int lines_quantity = 0;
+	if (!is_lines_loop) {
+		lines_quantity = towers_.size() - 1;
 	} else {
-		linesQuantity = towers_.size();
+		lines_quantity = towers_.size();
 	}
 
-	for (unsigned int i = 0; i < linesQuantity; i++)
+	for (unsigned int i = 0; i < lines_quantity; i++)
 	{
 		ECLine* line = ECLine::create();
 		game_layer_spritesheet_->addChild(line, Z_LINES);
 		lines_.push_back(line);
 	}
-	this->resetLines();
+	this->ResetLines();
 }
-void ECGameScene::resetLines()
+void ECGameScene::ResetLines()
 {
-	int counterA = 0;
-	int counterB = 0;
+	int counter_a = 0;
+	int counter_b = 0;
 
 	for (unsigned int i = 0; i < towers_.size(); i++)
 	{
 		if (i == towers_.size() - 1) //if i points to the last tower in the array
 		{
-			counterA = 0; //first tower in array
-			counterB = i; //last tower in array
+			counter_a = 0; //first tower in array
+			counter_b = i; //last tower in array
 		}
 		else
 		{
-			counterA = i;		//couple first
-			counterB = 1 + i;	// couple second
+			counter_a = i;		//couple first
+			counter_b = 1 + i;	// couple second
 		}
 
-		ECTower* towerOne = dynamic_cast<ECTower*>(towers_.at(counterA));
-		ECTower* towerTwo = dynamic_cast<ECTower*>(towers_.at(counterB));
+		ECTower* tower_a = dynamic_cast<ECTower*>(towers_.at(counter_a));
+		ECTower* tower_b = dynamic_cast<ECTower*>(towers_.at(counter_b));
 		ECLine* line = NULL;
 
 		// i must not point to a greater number than lines` number in the array
@@ -331,16 +335,16 @@ void ECGameScene::resetLines()
 			line = dynamic_cast<ECLine*>(lines_.at(i));
 		}
 
-		if (towerOne && towerTwo && line)
+		if (tower_a && tower_b && line)
 		{
 			// updating line between two towers | position & scaleX
-			line->resetLineBetweenTowers(towerOne, towerTwo);
+			line->ResetLineBetweenTowers(tower_a, tower_b);
 		}
 	}
 }
-void ECGameScene::checkForCollision()
+void ECGameScene::CheckForCollision()
 {
-	_gameLightsCounter = 0;
+	game_on_light_counter_ = 0;
 
 	std::vector<CCSprite*>::iterator buildingIter;
 	std::vector<CCSprite*>::iterator lineIter;
@@ -349,8 +353,8 @@ void ECGameScene::checkForCollision()
 		ECBuilding* building = dynamic_cast<ECBuilding*>(*buildingIter);
 		if (building)
 		{
-			if (building->getLightState() == LIGHT_ON)
-				building->setBuildingLight(LIGHT_OFF);
+			if (building->GetLightState() == LIGHT_ON)
+				building->SetBuildingLight(LIGHT_OFF);
 		}
 
 		for (lineIter=lines_.begin(); lineIter!=lines_.end(); lineIter++)
@@ -358,10 +362,10 @@ void ECGameScene::checkForCollision()
 			ECLine* line = dynamic_cast<ECLine*>(*lineIter);
 			if (line)
 			{
-				if (building->checkCollisionWithLine(line)) {
-					building->setBuildingLight(LIGHT_ON);
+				if (building->CheckCollisionWithLine(line)) {
+					building->SetBuildingLight(LIGHT_ON);
 					// increment light counter and when it equals to all houses number == win state
-					_gameLightsCounter++;
+					game_on_light_counter_++;
 
 				}
 			}
@@ -369,15 +373,15 @@ void ECGameScene::checkForCollision()
 	}
 	// update on lights counter
 	CCLabelBMFont* on_light_counter_label = (CCLabelBMFont*)this->getChildByTag(T_LEVEL_LIGHTS_COUNTER);
-	on_light_counter_label->setString(CCString::createWithFormat("%i | %i", _gameLightsCounter, buildings_.size())->getCString());
+	on_light_counter_label->setString(CCString::createWithFormat("%i | %i", game_on_light_counter_, buildings_.size())->getCString());
 }
-void ECGameScene::checkForWinState() {
+void ECGameScene::CheckForWinState() {
 
 	// win situation
-	if (_gameLightsCounter == buildings_.size()) {
+	if (game_on_light_counter_ == buildings_.size()) {
 		// unschedule update, disable touch on towers
-		this->pauseGameLoop(true);
-		CCCallFunc* callPauseGameFunction = CCCallFunc::create(this, callfunc_selector(ECGameScene::winGame));
+		this->PauseGameLoop(true);
+		CCCallFunc* callPauseGameFunction = CCCallFunc::create(this, callfunc_selector(ECGameScene::WinGame));
 		// delay to show win sprites, just for effect
 		CCDelayTime* delayBeforePausGameFunctionCall = CCDelayTime::create(0.5f);
 		CCSequence* sequence = CCSequence::create(delayBeforePausGameFunctionCall, callPauseGameFunction, NULL);
@@ -385,14 +389,14 @@ void ECGameScene::checkForWinState() {
 	}
 		//CCLOG("COUNTER: %i", _gameLightsCounter);
 }
-void ECGameScene::pauseGame(CCObject* pSender) {
+void ECGameScene::PauseGame(CCObject* pSender) {
 	CCLOG("PAUSE BUTTON");
 
 	// click
 	audio_manager_->PlayButtonClickSound();
 
 	// pause the loop | update method.
-	this->pauseGameLoop(true);
+	this->PauseGameLoop(true);
 
 	// black shaded transparent background layer
 	CCLayerColor* pauseShadeTransparentBackgroundLayer = CCLayerColor::create(ccc4(0,0,0,100));
@@ -419,7 +423,7 @@ void ECGameScene::pauseGame(CCObject* pSender) {
 																continueButtonSpriteSelected,
 																NULL,
 																this,
-																menu_selector(ECGameScene::pauseMenuItemClicked));
+																menu_selector(ECGameScene::PauseMenuItemClicked));
 	continueButton->setTag(T_CONTINUE);
 	continueButton->setPosition(ccp(stick->getPosition().x, stick->getPosition().y + stick->getContentSize().height - continueButton->getContentSize().height * 0.6f));
 	// skip level
@@ -429,7 +433,7 @@ void ECGameScene::pauseGame(CCObject* pSender) {
 																 skipLevelButtonSpriteSelected,
 																 NULL,
 																 this,
-																 menu_selector(ECGameScene::pauseMenuItemClicked));
+																 menu_selector(ECGameScene::PauseMenuItemClicked));
 	skipLevelButton->setTag(T_SKIP_LEVEL);
 	skipLevelButton->setPosition(ccpSub(continueButton->getPosition(), ccp(0, skipLevelButton->getContentSize().height * 0.8f)));
 	// select level
@@ -439,7 +443,7 @@ void ECGameScene::pauseGame(CCObject* pSender) {
 																   selectLevelButtonSpriteSelected,
 																   NULL,
 																   this,
-																   menu_selector(ECGameScene::pauseMenuItemClicked));
+																   menu_selector(ECGameScene::PauseMenuItemClicked));
 	selectLevelButton->setTag(T_SELECT_LEVEL);
 	selectLevelButton->setPosition(ccpSub(skipLevelButton->getPosition(), ccp(0, selectLevelButton->getContentSize().height * 0.8f)));
 	// main menu
@@ -449,7 +453,7 @@ void ECGameScene::pauseGame(CCObject* pSender) {
 																   mainMenuButtonSpriteSelected,
 																   NULL,
 																   this,
-																   menu_selector(ECGameScene::pauseMenuItemClicked));
+																   menu_selector(ECGameScene::PauseMenuItemClicked));
 	mainMenuButton->setTag(T_MAIN_MENU);
 	mainMenuButton->setPosition(ccpSub(selectLevelButton->getPosition(), ccp(0, mainMenuButton->getContentSize().height * 0.8f)));
 
@@ -467,15 +471,15 @@ void ECGameScene::pauseGame(CCObject* pSender) {
 	afterPauseOptionMenu->runAction(moveMenuUp);
 
 	// move restart - pause buttons up
-	this->moveUIElementsInDirection(A_MOVE_UP);
+	this->MoveUIElementsInDirection(A_MOVE_UP);
 }
-void ECGameScene::pauseGame() {
-	this->pauseGame(NULL);
+void ECGameScene::PauseGame() {
+	this->PauseGame(NULL);
 }
-void ECGameScene::pauseGameLoop(bool isPaused) {
-	if (isPaused) {
+void ECGameScene::PauseGameLoop(bool is_paused) {
+	if (is_paused) {
 		// disable touch in towers
-		this->setTowersTouchMode(false);
+		this->SetTowersTouchMode(false);
 		// unschedule game update
 		this->unscheduleUpdate();
 
@@ -483,25 +487,25 @@ void ECGameScene::pauseGameLoop(bool isPaused) {
 		// schedule update of game loop
 		this->scheduleUpdate();
 		// enable touch in towers
-		this->setTowersTouchMode(true);
+		this->SetTowersTouchMode(true);
 	}
 }
-void ECGameScene::restartGame(CCObject* pSender) {
+void ECGameScene::RestartGame(CCObject* pSender) {
 	audio_manager_->PlayButtonClickSound();
 	// just restart scene with a current level
 	ECSceneManager::GoGameSceneWithLevel(current_level_);
 }
-void ECGameScene::nextLevel(CCObject* pSender) {
+void ECGameScene::NextLevel(CCObject* pSender) {
 
 	int nextLevelNumber = GetNextLevelNumber();
 	CCString* nextLevel = CCString::createWithFormat("level%i",nextLevelNumber);
 	std::string nextLevelString (nextLevel->getCString());
 	ECSceneManager::GoGameSceneWithLevel(nextLevelString);
 }
-void ECGameScene::levelSelectLayer(CCObject* pSender) {
+void ECGameScene::LevelSelectLayer(CCObject* pSender) {
 	ECSceneManager::GoLevelSelectScene();
 }
-void ECGameScene::pauseMenuItemClicked(CCObject* pSender) {
+void ECGameScene::PauseMenuItemClicked(CCObject* pSender) {
 	CCMenuItem* item = (CCMenuItem*)pSender;
 	switch (item->getTag())
 	{
@@ -514,27 +518,27 @@ void ECGameScene::pauseMenuItemClicked(CCObject* pSender) {
 			// stick
 			CCSprite* stick = (CCSprite*)this->getChildByTag(T_STICK);
 			CCMoveBy* moveStickDown = CCMoveBy::create(0.3f, ccp(0, -stick->getContentSize().height));
-			CCCallFuncND* removeFunctionForStick = CCCallFuncND::create(this, callfuncND_selector(ECGameScene::removeObjectFromParent), (void*)true);
+			CCCallFuncND* removeFunctionForStick = CCCallFuncND::create(this, callfuncND_selector(ECGameScene::RemoveObjectFromParent), (void*)true);
 			CCSequence* stickSequence = CCSequence::create(moveStickDown, removeFunctionForStick, NULL);
 			stick->runAction(stickSequence);
 
 			// menu
 			CCMenu* afterPauseMenu = (CCMenu*)this->getChildByTag(T_AFTER_PAUSE_MENU);
 			CCMoveBy* moveMenuDown = CCMoveBy::create(0.3f, ccp(0, -stick->getContentSize().height));
-			CCCallFuncND* removeFunctionForMenu = CCCallFuncND::create(this, callfuncND_selector(ECGameScene::removeObjectFromParent), (void*)true);
+			CCCallFuncND* removeFunctionForMenu = CCCallFuncND::create(this, callfuncND_selector(ECGameScene::RemoveObjectFromParent), (void*)true);
 			CCSequence* menuSequence = CCSequence::create(moveMenuDown, removeFunctionForMenu, NULL);
 			afterPauseMenu->runAction(menuSequence);
 
 			// move restart - pause buttons down
-			this->moveUIElementsInDirection(A_MOVE_DOWN);
+			this->MoveUIElementsInDirection(A_MOVE_DOWN);
 
 			// continue the loop
-			this->pauseGameLoop(false);
+			this->PauseGameLoop(false);
 		}
 		break;
 	case T_SKIP_LEVEL:
 		{
-			this->nextLevel(NULL);
+			this->NextLevel(NULL);
 		}
 		break;
 
@@ -550,7 +554,7 @@ void ECGameScene::pauseMenuItemClicked(CCObject* pSender) {
 	// sound
 	audio_manager_->PlayButtonClickSound();
 }
-void ECGameScene::winGame() {
+void ECGameScene::WinGame() {
 
 	// audio
 	audio_manager_->PlayActionWinSound();
@@ -558,14 +562,14 @@ void ECGameScene::winGame() {
 	// pause game loop
 	//this->pauseGameLoop(true);
 	// move restart - pause buttons down
-	this->moveUIElementsInDirection(A_MOVE_UP);
+	this->MoveUIElementsInDirection(A_MOVE_UP);
 
 	// saves achievements
-	int score = CalculateFinalScoreForTime(_gameTimer);
+	int score = CalculateFinalScoreForTime(game_timer_);
 	// a variable used in label update/timer
 	final_game_score_ = score;
 	// saving achievment in database
-	this->SaveAchievements(_gameTimer, score);
+	this->SaveAchievements(game_timer_, score);
 	this->SaveLevelData();
 
 	float best_time = ECDataProvider::GetBestTimeForLevel(current_level_);
@@ -611,7 +615,7 @@ void ECGameScene::winGame() {
 	winInfoBoard->addChild(level_name_label);
 
 	// current played time
-	CCString* played_time_string = CCString::createWithFormat("Time: %.1f", _gameTimer);
+	CCString* played_time_string = CCString::createWithFormat("Time: %.1f", game_timer_);
 	CCLabelBMFont* played_time_label = CCLabelBMFont::create(played_time_string->getCString(), "win_font_text.fnt");
 	played_time_label->setAnchorPoint(ccp(0.0f, 0.5f));
 	played_time_label->setScale(1.3f);
@@ -673,7 +677,7 @@ void ECGameScene::winGame() {
 	CCSprite* replayButtonSpriteSelected = CCSprite::createWithSpriteFrameName("go_replay_level_button_selected.png");
 
 	CCMenuItemSprite* replayButton = CCMenuItemSprite::create(replayButtonSprite, replayButtonSpriteSelected, NULL, this,
-															  menu_selector(ECGameScene::restartGame));
+															  menu_selector(ECGameScene::RestartGame));
 	//replayButton->setPosition(ccpSub(winInfoBoard->getPosition(), ccp(winInfoBoard->getContentSize().width * 1.5f, 0)));
 	replayButton->setPosition(winInfoBoard->getPosition().x - winInfoBoard->getContentSize().width * 0.35f,
 							  screen_size_.height * 0.5f - winInfoBoard->getContentSize().height * 0.55f);
@@ -682,7 +686,7 @@ void ECGameScene::winGame() {
 	CCSprite* nextLevelButtonSpriteSelected = CCSprite::createWithSpriteFrameName("go_next_level_button_selected.png");
 
 	CCMenuItemSprite* nextLevelButton = CCMenuItemSprite::create(nextLevelButtonSprite, nextLevelButtonSpriteSelected, NULL, this,
-																 menu_selector(ECGameScene::nextLevel));
+																 menu_selector(ECGameScene::NextLevel));
 	nextLevelButton->setPosition(ccp(winInfoBoard->getPosition().x + winInfoBoard->getContentSize().width * 0.01f,
 									 replayButton->getPosition().y));
 
@@ -691,7 +695,7 @@ void ECGameScene::winGame() {
 	CCSprite* levelSelectButtonSpriteSelected = CCSprite::createWithSpriteFrameName("go_level_menu_button_selected.png");
 
 	CCMenuItemSprite* levelSelectButton = CCMenuItemSprite::create(levelSelectButtonSprite, levelSelectButtonSpriteSelected, NULL, this,
-																 menu_selector(ECGameScene::levelSelectLayer));
+																 menu_selector(ECGameScene::LevelSelectLayer));
 	levelSelectButton->setPosition(ccp(winInfoBoard->getPosition().x + winInfoBoard->getContentSize().width * 0.35f,
 									   replayButton->getPosition().y));
 
@@ -795,7 +799,7 @@ int ECGameScene::GetNextLevelNumber() const {
 	}
 	return next_level_number;
 }
-void ECGameScene::moveUIElementsInDirection(UIElementsMoveDirection direction) {
+void ECGameScene::MoveUIElementsInDirection(UIElementsMoveDirection direction) {
 	// pause_restart_menu
 	CCMenu* pauseRestartMenu = (CCMenu*)this->getChildByTag(T_PAUSE_RESTART_MENU);
 	CCMoveTo* movePauseRestartMenu = NULL;
@@ -812,11 +816,11 @@ void ECGameScene::moveUIElementsInDirection(UIElementsMoveDirection direction) {
 	// run action
 	pauseRestartMenu->runAction(movePauseRestartMenu);
 }
-void ECGameScene::setTowersTouchMode(bool isTouchEnabled) {
+void ECGameScene::SetTowersTouchMode(bool isTouchEnabled) {
 	// remove touch delegate in tower
 	if (!isTouchEnabled) {
 		std::vector<CCSprite*>::iterator towerIter;
-		for (towerIter=towers_.begin(); towerIter!=towers_.end(); towerIter++) {
+		for (towerIter = towers_.begin(); towerIter != towers_.end(); towerIter++) {
 			ECTower* tower = dynamic_cast<ECTower*>(*towerIter);
 			if (tower) {
 				CCDirector* director = CCDirector::sharedDirector();
@@ -835,18 +839,18 @@ void ECGameScene::setTowersTouchMode(bool isTouchEnabled) {
 		}
 	}
 }
-void ECGameScene::removeSpriteFromSpriteSheet(CCNode* pSender, void* data) {
+void ECGameScene::RemoveSpriteFromSpriteSheet(CCNode* pSender, void* data) {
 	CCSprite* sprite = (CCSprite*)pSender;
-	bool boolVal = data != NULL;
+	bool bool_val = data != NULL;
 	if (sprite) {
-		game_layer_spritesheet_->removeChild(sprite, boolVal);
+		game_layer_spritesheet_->removeChild(sprite, bool_val);
 	}
 }
-void ECGameScene::removeObjectFromParent(CCNode* pSender, void* data) {
+void ECGameScene::RemoveObjectFromParent(CCNode* pSender, void* data) {
 	CCNode* object = pSender;
-	bool boolVal = data != NULL;
+	bool bool_val = data != NULL;
 	if (object) {
-		this->removeChild(object, boolVal);
+		this->removeChild(object, bool_val);
 	}
 }
 int ECGameScene::CalculateFinalScoreForTime(const float game_timer) const {
@@ -905,7 +909,7 @@ void ECGameScene::ccTouchesBegan(CCSet* pTouches, CCEvent* pEvent)
 	for (touchIter = pTouches->begin(); touchIter != pTouches->end(); touchIter++)
 	{
 		CCTouch* touch = (CCTouch*)(*touchIter);
-		CCPoint touchPoint = convertTouchToPoint(touch);
+		CCPoint touchPoint = ConvertTouchToPoint(touch);
 	}
 }
 void ECGameScene::ccTouchesMoved(CCSet* pTouches, CCEvent* pEvent)
@@ -914,20 +918,20 @@ void ECGameScene::ccTouchesMoved(CCSet* pTouches, CCEvent* pEvent)
 	for (touchIter = pTouches->begin(); touchIter != pTouches->end(); touchIter++)
 	{
 		CCTouch* touch = (CCTouch*)(*touchIter);
-		CCPoint touchPoint = convertTouchToPoint(touch);
+		CCPoint touchPoint = ConvertTouchToPoint(touch);
 	}
 }
 void ECGameScene::ccTouchesEnded(CCSet* pTouches, CCEvent* pEvent)
 {
 
 }
-CCPoint ECGameScene::convertTouchToPoint(CCTouch* touch)
+CCPoint ECGameScene::ConvertTouchToPoint(CCTouch* touch)
 {
 	CCPoint touchPoint = touch->getLocationInView();
 	touchPoint = CCDirector::sharedDirector()->convertToGL(touchPoint);
 	return touchPoint;
 }
-bool ECGameScene::isTouchOnObject(CCTouch* touch, CCSprite* object)
+bool ECGameScene::IsTouchOnObject(CCTouch* touch, CCSprite* object)
 {
 	CCPoint touchPoint = CCDirector::sharedDirector()->convertToGL(touch->getLocationInView());
 	if (object->boundingBox().containsPoint(touchPoint))

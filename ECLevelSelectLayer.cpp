@@ -4,6 +4,7 @@
 #include "ECDataProviderExt.h"
 #include "ECDataProvider.h"
 #include "ECSceneManager.h"
+#include "ECAudioManager.h"
 
 ECLevelSelectLayer::ECLevelSelectLayer() {
 
@@ -11,6 +12,9 @@ ECLevelSelectLayer::ECLevelSelectLayer() {
 
 ECLevelSelectLayer::~ECLevelSelectLayer() {
 	CCSpriteFrameCache::sharedSpriteFrameCache()->removeSpriteFramesFromFile("level_select_layer_spritesheet.plist");
+
+	delete audio_manager_;
+	audio_manager_ = NULL;
 }
 
 CCScene* ECLevelSelectLayer::scene()
@@ -31,28 +35,28 @@ CCScene* ECLevelSelectLayer::scene()
 }
 bool ECLevelSelectLayer::init()
 {
-	bool isSuccess = false;
+	bool is_success = false;
 	do
 	{
 		CC_BREAK_IF(!CCLayer::init());
 
 		screen_size_ = CCDirector::sharedDirector()->getWinSize();
 		
-		CCRect winRect;
-		winRect.origin = CCDirector::sharedDirector()->getVisibleOrigin();
-		CCPoint winPoint = CCDirector::sharedDirector()->getVisibleOrigin();
+		CCRect win_rect;
+		win_rect.origin = CCDirector::sharedDirector()->getVisibleOrigin();
+		CCPoint win_point = CCDirector::sharedDirector()->getVisibleOrigin();
 
-		float winBottomY = winRect.origin.y;
+		float winBottomY = win_rect.origin.y;
 
 		CCSpriteFrameCache::sharedSpriteFrameCache()->addSpriteFramesWithFile("level_select_layer_spritesheet.plist");
-		CCSpriteBatchNode* levelSelectLayerSpritesheet = CCSpriteBatchNode::create("level_select_layer_spritesheet.pvr.ccz");
-		this->addChild(levelSelectLayerSpritesheet);
+		CCSpriteBatchNode* level_select_layer_spritesheet = CCSpriteBatchNode::create("level_select_layer_spritesheet.pvr.ccz");
+		this->addChild(level_select_layer_spritesheet);
 
 		// scroll view
-		ECLevelChapterLayer* chapterOnePage   = ECLevelChapterLayer::CreateWithBackgroundImage("chapter_1.png", 1);
-		ECLevelChapterLayer* chapterTwoPage   = ECLevelChapterLayer::CreateWithBackgroundImage("chapter_2.png", 2);
-		ECLevelChapterLayer* chapterThreePage = ECLevelChapterLayer::CreateWithBackgroundImage("chapter_3.png", 3);
-		ECLevelChapterLayer* chapterFourPage  = ECLevelChapterLayer::CreateWithBackgroundImage("chapter_4.png", 4);
+		ECLevelChapterLayer* chapter_page_one   = ECLevelChapterLayer::CreateWithBackgroundImage("chapter_1.png", 1);
+		ECLevelChapterLayer* chapter_page_two   = ECLevelChapterLayer::CreateWithBackgroundImage("chapter_2.png", 2);
+		ECLevelChapterLayer* chapter_page_three = ECLevelChapterLayer::CreateWithBackgroundImage("chapter_3.png", 3);
+		ECLevelChapterLayer* chapter_page_four  = ECLevelChapterLayer::CreateWithBackgroundImage("chapter_4.png", 4);
 
 		ECDataProviderExt* data_provider = new ECDataProviderExt("level_state.xml", "levels");
 		// containers
@@ -61,21 +65,21 @@ bool ECLevelSelectLayer::init()
 		// loading data and putting them in containers
 		data_provider->LoadDataForLevelSelectButtons(v_open_levels, mp_played_with_stars_buttons);
 
-		chapterOnePage->CreateLevelSelectButtons(3,5,1,v_open_levels, mp_played_with_stars_buttons);
-		chapterTwoPage->CreateLevelSelectButtons(3,5,16, v_open_levels, mp_played_with_stars_buttons);
-		chapterThreePage->CreateLevelSelectButtons(3,5,31, v_open_levels, mp_played_with_stars_buttons);
-		chapterFourPage->CreateLevelSelectButtons(3,5,46, v_open_levels,mp_played_with_stars_buttons);
+		chapter_page_one->CreateLevelSelectButtons(3,5,1,v_open_levels, mp_played_with_stars_buttons);
+		chapter_page_two->CreateLevelSelectButtons(3,5,16, v_open_levels, mp_played_with_stars_buttons);
+		chapter_page_three->CreateLevelSelectButtons(3,5,31, v_open_levels, mp_played_with_stars_buttons);
+		chapter_page_four->CreateLevelSelectButtons(3,5,46, v_open_levels,mp_played_with_stars_buttons);
 
 		delete data_provider;
 		data_provider = NULL;
 
-		CCArray* levelChapterArray = new CCArray();
-		levelChapterArray->addObject(chapterOnePage);
-		levelChapterArray->addObject(chapterTwoPage);
-		levelChapterArray->addObject(chapterThreePage);
-		levelChapterArray->addObject(chapterFourPage);
+		CCArray* level_chapters_array = new CCArray();
+		level_chapters_array->addObject(chapter_page_one);
+		level_chapters_array->addObject(chapter_page_two);
+		level_chapters_array->addObject(chapter_page_three);
+		level_chapters_array->addObject(chapter_page_four);
 
-		ECScrollLayer* scroller = ECScrollLayer::createWithLayersWithOffset(levelChapterArray, 1);
+		ECScrollLayer* scroller = ECScrollLayer::createWithLayersWithOffset(level_chapters_array, 1);
 		scroller->_pagesIndicatorNormalColor = ccc4(14,134,93,255);
 		scroller->_pagesIndicatorSelectedColor = ccc4(227,164,45,255);
 		scroller->_pagesIndicatorPosition = ccp(screen_size_.width * 0.5f, winBottomY+5);
@@ -92,10 +96,10 @@ bool ECLevelSelectLayer::init()
 		this->addChild(total_score_label);
 
 		// main menu back button
-		CCSprite* back_button_sprite = CCSprite::createWithSpriteFrameName("back.png");
-		CCSprite* back_button_sprite_selected = CCSprite::createWithSpriteFrameName("back_selected.png");
+		CCSprite* back_button_sprite		  = CCSprite::createWithSpriteFrameName("back.png");
+		CCSprite* back_button_selected_sprite = CCSprite::createWithSpriteFrameName("back_selected.png");
 		CCMenuItemSprite* back_button = CCMenuItemSprite::create(back_button_sprite, 
-																 back_button_sprite_selected,	
+																 back_button_selected_sprite,	
 																 NULL,
 																 this,
 																 menu_selector(ECLevelSelectLayer::GoMainMenu));
@@ -104,10 +108,12 @@ bool ECLevelSelectLayer::init()
 		menu->setPosition(ccp(0,0));
 		this->addChild(menu);
 
+		//audio
+		audio_manager_ = ECAudioManager::CreateAudioManagerForScene(LEVEL_SELECT_SCENE_AUDIO);
 
-		isSuccess = true;
+		is_success = true;
 	}while(0);
-	return isSuccess;
+	return is_success;
 }
 void ECLevelSelectLayer::update(float delta)
 {
@@ -123,5 +129,7 @@ void ECLevelSelectLayer::scrollViewDidZoom(CCScrollView* view)
 
 }
 void ECLevelSelectLayer::GoMainMenu(CCObject* sender) {
+	// audio
+	audio_manager_->PlayButtonClickSound();
 	ECSceneManager::GoMainMenuScene();
 }

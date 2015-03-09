@@ -25,16 +25,16 @@ ECLevelChapterLayer* ECLevelChapterLayer::CreateWithBackgroundImage(const char* 
 	}
 }
 
-bool ECLevelChapterLayer::InitWithBackgroundImage(const char* background_img_file_name, const int page_number)
+bool ECLevelChapterLayer::InitWithBackgroundImage(const char* background_img_filename, const int page_number)
 {
-	bool isSuccess = false;
+	bool is_success = false;
 	do
 	{
 		CC_BREAK_IF(!CCLayer::init());
 
 		screen_size_ = CCDirector::sharedDirector()->getWinSize();
 
-		CCSprite* background = CCSprite::createWithSpriteFrameName(background_img_file_name);
+		CCSprite* background = CCSprite::createWithSpriteFrameName(background_img_filename);
 
 		if (page_number == 1) {
 			background->setAnchorPoint(ccp(0.09433962264151f, 0.0f));
@@ -44,21 +44,21 @@ bool ECLevelChapterLayer::InitWithBackgroundImage(const char* background_img_fil
 
 		this->addChild(background);
 
-		isSuccess = true;
+		is_success = true;
 	}while(0);
-	return isSuccess;
+	return is_success;
 }
 void ECLevelChapterLayer::CreateLevelSelectButtons(int row,											// rows
 												   int col,											// columns
-								                   int numberOrderFrom,								// counter start number 
+								                   int number_order_from,							// counter start number 
 												   std::vector<int>& v_open_levels,					// nonblocked levels 
-												   std::map<int,int>& mp_played_with_stars_buttons) // level number and number of stars after completed
+												   std::map<int,int>& mp_played_with_stars_buttons) // level number and number of stars after completion
 {
-	float xOffset = 50;
-	float yOffset = 50;
+	float x_offset = 50;
+	float y_offset = 50;
 
-	float xDistance = 90;
-	float yDistance = 59;
+	float x_distance = 90;
+	float y_distance = 59;
 
 	CCMenu* menu = CCMenu::create();
 	menu->setPosition(ccp(0,0));
@@ -75,13 +75,12 @@ void ECLevelChapterLayer::CreateLevelSelectButtons(int row,											// rows
 	{
 		for (int j = 0; j < col; j++)
 		{
-			button_normal = CCSprite::createWithSpriteFrameName("level_select_button_normal.png");
+			button_normal	= CCSprite::createWithSpriteFrameName("level_select_button_normal.png");
 			button_selected = CCSprite::createWithSpriteFrameName("level_select_button_selected.png");
-			button_blocked = CCSprite::createWithSpriteFrameName("level_select_button_blocked.png");
+			button_blocked	= CCSprite::createWithSpriteFrameName("level_select_button_blocked.png");
 
-			button = CCMenuItemSprite::create(button_normal, button_selected, button_blocked,
-																this,menu_selector(ECLevelChapterLayer::SelectLevel));
-			button->setPosition(ccp(xOffset + xDistance * j, screen_size_.height - yOffset - yDistance * i));
+			button = CCMenuItemSprite::create(button_normal, button_selected, button_blocked, this,menu_selector(ECLevelChapterLayer::SelectLevel));
+			button->setPosition(ccp(x_offset + x_distance * j, screen_size_.height - y_offset - y_distance * i));
 			button->setEnabled(false);
 			menu->addChild(button);
 
@@ -95,37 +94,37 @@ void ECLevelChapterLayer::CreateLevelSelectButtons(int row,											// rows
 	}
 
 	// create numbers label
-	int currentNumber = numberOrderFrom;
+	int current_number = number_order_from;
 	CCObject* obj = NULL;
 	CCARRAY_FOREACH(this->getChildren(), obj)
 	{
 		if (CCLabelTTF* buttonNumber = dynamic_cast<CCLabelTTF*>(obj)) {
-			buttonNumber->setString(CCString::createWithFormat("%i", currentNumber)->getCString());
-			currentNumber++;
+			buttonNumber->setString(CCString::createWithFormat("%i", current_number)->getCString());
+			current_number++;
 
 			std::vector<int>::iterator iterator;
 			for (iterator = v_open_levels.begin(); iterator != v_open_levels.end(); ++iterator) {
 				int val = (int)*iterator;
-				if (val == currentNumber) {
+				if (val == current_number) {
 					buttonNumber->setVisible(true);
 				}
 			}
 		}
 	}
 	// setup button tags
-	int currentTag = numberOrderFrom;
-	CCObject* tagObj = NULL;
-	CCARRAY_FOREACH(menu->getChildren(), tagObj)
+	int current_tag = number_order_from;
+	CCObject* tag_obj = NULL;
+	CCARRAY_FOREACH(menu->getChildren(), tag_obj)
 	{
-		if (CCMenuItemSprite* button = dynamic_cast<CCMenuItemSprite*>(tagObj)) {
-			button->setTag(currentTag);
-			currentTag++;
+		if (CCMenuItemSprite* button = dynamic_cast<CCMenuItemSprite*>(tag_obj)) {
+			button->setTag(current_tag);
+			current_tag++;
 
 			// iterate throught open levels, if find then sets button property -> enabled.
 			std::vector<int>::iterator iterator_open_levels;
 			for (iterator_open_levels = v_open_levels.begin(); iterator_open_levels != v_open_levels.end(); ++iterator_open_levels) {
 				int level_number = (int)*iterator_open_levels;
-				if (level_number == currentTag) {
+				if (level_number == current_tag) {
 					button->setEnabled(true);
 				}
 			}
@@ -138,7 +137,7 @@ void ECLevelChapterLayer::CreateLevelSelectButtons(int row,											// rows
 				// level number and number of stars of that level when completed
 				int level_number			  = map_iterator->first;
 				int number_of_stars_for_level = map_iterator->second;
-				if (level_number == currentTag) {
+				if (level_number == current_tag) {
 					switch (number_of_stars_for_level)
 					{
 						case 3:
@@ -165,9 +164,9 @@ void ECLevelChapterLayer::SelectLevel(CCObject* sender)
 {
 	if (CCMenuItemSprite* button = dynamic_cast<CCMenuItemSprite*>(sender)) {
 		CCLOG("level%i", button->getTag());
-		CCString* selectedLevel = CCString::createWithFormat("level%i", button->getTag());
-		std::string selectedLevelStr;
-		selectedLevelStr.assign(selectedLevel->getCString());
-		ECSceneManager::GoGameSceneWithLevel(selectedLevelStr);
+		CCString* selected_level = CCString::createWithFormat("level%i", button->getTag());
+		std::string selected_level_string;
+		selected_level_string.assign(selected_level->getCString());
+		ECSceneManager::GoGameSceneWithLevel(selected_level_string);
 	}
 }
