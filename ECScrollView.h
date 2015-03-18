@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	diyor.islomov@gmail.com || @iDiyor 
 #ifndef __EC_SCROLL_VIEW__
 #define __EC_SCROLL_VIEW__
 

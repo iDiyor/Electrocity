@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	diyor.islomov@gmail.com || @iDiyor 
 #include "ECDataProvider.h"
 
 #define BEST_TIME_KEY "BEST_TIME"

@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	diyor.islomov@gmail.com || @iDiyor 
 #include "ECLevelSelectLayer.h"
 #include "ECLevelChapterLayer.h"
 #include "ECScrollView.h"

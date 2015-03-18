@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	diyor.islomov@gmail.com || @iDiyor 
 #ifndef __EC_TOWER_H__
 #define __EC_TOWER_H__
 

@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	diyor.islomov@gmail.com || @iDiyor 
 #ifndef __EC_LEVEL_CHAPTER_LAYER_H__
 #define __EC_LEVEL_CHAPTER_LAYER_H__
 

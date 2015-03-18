@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	diyor.islomov@gmail.com || @iDiyor 
 #ifndef _EC_SETTINGS_SCENE_H_
 #define _EC_SETTINGS_SCENE_H_
 
@@ -11,7 +13,7 @@ class ECSettingsScene : CCLayer
 {
 public:
 
-	virtual bool init();
+	bool init();
 	static CCScene* scene();
 
 	CREATE_FUNC(ECSettingsScene);

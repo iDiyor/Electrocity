@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	diyor.islomov@gmail.com || @iDiyor 
 #include "ECTower.h"
 #include "ECGameScene.h"
 
@@ -41,6 +43,7 @@ bool ECTower::InitTowerWithFileName(const char* filename)
 	{
 		CC_BREAK_IF(!CCSprite::initWithSpriteFrameName(filename));
 
+		tower_state_ = ON_TOWER_ENDED;
 
 		is_success = true;
 	}while (0);
@@ -111,6 +114,7 @@ void ECTower::ccTouchMoved(CCTouch* pTouch, CCEvent* pEvent)
 }
 void ECTower::ccTouchEnded(CCTouch* pTouch, CCEvent* pEvent)
 {
+
 	tower_state_ = ON_TOWER_ENDED;
 }
 void ECTower::touchDelegateRetain()

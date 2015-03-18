@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	diyor.islomov@gmail.com || @iDiyor 
 #include "ECScrollView.h"
 
 ECScrollLayer* ECScrollLayer::createWithLayersWithOffset(CCArray* layers, int widthOffset)

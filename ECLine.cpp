@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	diyor.islomov@gmail.com || @iDiyor 
 #include "ECLine.h"
 #include "ECTower.h"
 
@@ -43,9 +45,11 @@ void ECLine::ResetLineBetweenTowers(ECTower* tower_a, ECTower* tower_b)
 	this->setScaleX(length / this->getContentSize().width);
 
 	//_beginLinePoint = this->getPosition();
-	line_end_point_ = ccpAdd(this->getPosition(), ccpMult(ccp(cos(angle_in_rad), sin(angle_in_rad)), length));
+	line_end_point_ = tower_b_point;//ccpAdd(this->getPosition(), ccpMult(ccp(cos(angle_in_rad), sin(angle_in_rad)), length));
 }
-const CCPoint& ECLine::GetLineEndPoint()
+CCPoint ECLine::GetLineEndPoint()
 {
 	return line_end_point_;
 }
+
+

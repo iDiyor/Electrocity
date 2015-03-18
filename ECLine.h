@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	diyor.islomov@gmail.com || @iDiyor 
 #ifndef __EC_LINE_H__
 #define __EC_LINE_H__
 
@@ -16,9 +18,9 @@ public:
 	ECLine();
 	~ECLine();
 	
-	void ResetLineBetweenTowers(ECTower* towerA, ECTower* towerB);
+	void ResetLineBetweenTowers(ECTower* tower_a, ECTower* tower_b);
 
-	const CCPoint& GetLineEndPoint();
+	CCPoint GetLineEndPoint();
 private:
 
 	//CCPoint _beginLinePoint;

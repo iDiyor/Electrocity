@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	diyor.islomov@gmail.com || @iDiyor 
 #ifndef __EC_DATA_PROVIDER_EXT__
 #define __EC_DATA_PROVIDER_EXT__
 

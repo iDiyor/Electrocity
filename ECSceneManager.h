@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	diyor.islomov@gmail.com || @iDiyor 
 #ifndef __EC_SCENE_MANAGER_H__
 #define __EC_SCENE_MANAGER_H__
 
@@ -15,8 +17,6 @@ public:
 	static void GoLevelSelectScene();
 	static void GoSettingsScene();
 	static void GoSettingsSceneWithoutLoadingScene();
-
-
 };
 
 #endif //__EC_SCENE_MANAGER_H__

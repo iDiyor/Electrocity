@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	diyor.islomov@gmail.com || @iDiyor 
 #include "ECSceneManager.h"
 //#include "ECGameScene.h"
 //#include "ECMainMenuScene.h"
