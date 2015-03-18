@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	i.dior@mail.ru || diyor.islomov@gmail.com || @iDiyor 
 #ifndef __EC_AUDIO_MANAGER_H__ 
 #define __EC_AUDIO_MANAGER_H__
 
