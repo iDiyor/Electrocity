@@ -1,3 +1,5 @@
+//  Copyright (c) 2015 Diyor Islomov. All rights reserved.
+//	diyor.islomov@gmail.com || @iDiyor 
 #ifndef __EC_GAME_SCENE_H__
 #define __EC_GAME_SCENE_H__
 
@@ -171,6 +173,7 @@ private:
 	// collections - vectors
 	std::vector<CCSprite*> towers_;					/*!< vector container that stores all the towers in a level */
 	std::vector<CCSprite*> buildings_;				/*!< vector container that stores all the buildings(houses) in a level */
+	std::vector<CCSprite*> buildings_with_on_lights_;
 	std::vector<CCSprite*> lines_;					/*!< vector container that stores all the lines connected to towers in a level */
 
 	CCSpriteBatchNode* game_layer_spritesheet_;		/*!< main game spritesheet that contains all the sprites(background,
