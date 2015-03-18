@@ -13,6 +13,12 @@ typedef enum {
 	LIGHT_ON
 } LightState;
 
+typedef enum {
+	YES_CONTACT,
+	NO_CONTACT
+} ContactState;
+
+
 class ECBuilding : public CCSprite
 {
 public:
@@ -27,11 +33,13 @@ public:
 	bool CheckCollisionWithLine(ECTower* tower_a, ECTower* tower_b);
 	void SetBuildingLight(LightState state);
 	int GetLightState();
+	int GetContactState();
 
 private:
 	std::string building_image_filename_for_on_state_;
 	std::string building_image_filename_for_off_state_;
 	int light_state_;
+	int contact_state_;
 };
 
 

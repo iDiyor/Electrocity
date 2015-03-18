@@ -6,7 +6,8 @@
 
 ECBuilding::ECBuilding()
 {
-	light_state_ = LIGHT_OFF;
+	light_state_	= LIGHT_OFF;
+	contact_state_	= NO_CONTACT;
 }
 ECBuilding::~ECBuilding()
 {
@@ -64,7 +65,7 @@ bool ECBuilding::CheckCollisionWithLine(ECLine* line)
 	if ((ccpLineIntersect(line_begin_point, line_end_point, pLeftBottom, pLeftTop, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) ||
 		(ccpLineIntersect(line_begin_point, line_end_point, pLeftTop, pRightTop, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) ||
 		(ccpLineIntersect(line_begin_point, line_end_point, pRightTop, pRightBottom, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) || 
-		(ccpLineIntersect(line_begin_point, line_end_point, pLeftBottom, pRightBottom, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1)) 
+		(ccpLineIntersect(line_begin_point, line_end_point, pRightBottom, pLeftBottom, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1)) 
 	{
 		return true;
 	}
@@ -86,8 +87,8 @@ bool ECBuilding::CheckCollisionWithLine(ECTower* tower_a, ECTower* tower_b)
 	CCPoint right_top_point		= ccp(left_top_point.x + (this->getContentSize().width * (0.125f * scale)), left_top_point.y);
 	CCPoint right_bottom_point	= ccp(right_top_point.x, left_bottom_point.y);	
 
-	float s;
-	float t;
+	float s = 0;
+	float t = 0;
 
 	
 	if ((ccpLineIntersect(tower_a_point, tower_b_point, left_bottom_point, left_top_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) ||
@@ -95,8 +96,10 @@ bool ECBuilding::CheckCollisionWithLine(ECTower* tower_a, ECTower* tower_b)
 		(ccpLineIntersect(tower_a_point, tower_b_point, right_top_point, right_bottom_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) || 
 		(ccpLineIntersect(tower_a_point, tower_b_point, left_bottom_point, right_bottom_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1)) 
 	{
+		contact_state_ = YES_CONTACT;
 		return true;
 	}
+	contact_state_ = NO_CONTACT;
 	return false;
 }
 void ECBuilding::SetBuildingLight(LightState state)
@@ -108,21 +111,27 @@ void ECBuilding::SetBuildingLight(LightState state)
 	{
 	case LIGHT_OFF:
 		{		
-			building_sprite_frame = CCSpriteFrameCache::sharedSpriteFrameCache()->spriteFrameByName(building_image_filename_for_off_state_.c_str());
-			this->setDisplayFrame(building_sprite_frame);
-			light_state_ = LIGHT_OFF;
+			if (GetLightState() == LIGHT_ON) {
+				building_sprite_frame = CCSpriteFrameCache::sharedSpriteFrameCache()->spriteFrameByName(building_image_filename_for_off_state_.c_str());
+				this->setDisplayFrame(building_sprite_frame);
+				light_state_ = LIGHT_OFF;
+			}
 		}	
 		break;
 	case LIGHT_ON:
 		{	
-			building_sprite_frame = CCSpriteFrameCache::sharedSpriteFrameCache()->spriteFrameByName(building_image_filename_for_on_state_.c_str());
-			this->setDisplayFrame(building_sprite_frame);
-			light_state_ = LIGHT_ON;
+			if (GetLightState() == LIGHT_OFF) {
+				building_sprite_frame = CCSpriteFrameCache::sharedSpriteFrameCache()->spriteFrameByName(building_image_filename_for_on_state_.c_str());
+				this->setDisplayFrame(building_sprite_frame);
+				light_state_ = LIGHT_ON;
+			}
 		}
 		break;
 	}
 }
-int ECBuilding::GetLightState()
-{
+int ECBuilding::GetLightState() {
 	return light_state_;
+}
+int ECBuilding::GetContactState() {
+	return contact_state_;
 }
