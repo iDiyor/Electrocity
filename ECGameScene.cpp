@@ -180,7 +180,11 @@ bool ECGameScene::InitGameLayerToLayer(std::string& level)
 void ECGameScene::update(float delta)
 {
 	// loop through towers and find moving ones then update line
+<<<<<<< HEAD
 	for (unsigned int i = 0; i < towers_.size(); i++)
+=======
+	/*for (unsigned int i = 0; i < towers_.size(); i++)
+>>>>>>> 1a81808bd5968c0c1ae37ffaca935af35e2e1570
 	{
 		ECTower* tower = static_cast<ECTower*>(towers_.at(i));
 		if (tower->GetTowerState() == ON_TOWER_MOVED || tower->GetTowerState() == ON_TOWER_ENDED)
@@ -188,8 +192,13 @@ void ECGameScene::update(float delta)
 			this->ResetLines();
 			this->CheckForCollision();
 		}
+<<<<<<< HEAD
 	}
 	//this->ResetLines();
+=======
+	}*/
+	this->ResetLines();
+>>>>>>> 1a81808bd5968c0c1ae37ffaca935af35e2e1570
 	//this->CheckForCollision();
 
 	// check for win state
@@ -315,6 +324,7 @@ void ECGameScene::ResetLines()
 {
 	int counter_a = 0;
 	int counter_b = 0;
+<<<<<<< HEAD
 //	ECTower* tower_a = NULL;
 //	ECTower* tower_b = NULL;
 //	for (int i = 0; i < lines_.size(); i++) {
@@ -343,6 +353,36 @@ void ECGameScene::ResetLines()
 //			}
 //		}
 //	}
+=======
+	ECTower* tower_a = NULL;
+	ECTower* tower_b = NULL;
+	for (int i = 0; i < lines_.size(); i++) {
+		if (ECLine* line = dynamic_cast<ECLine*>(lines_.at(i))) {
+			if ((lines_.size() == towers_.size()) && (i == lines_.size() - 1)) { //if we have same amount of towers & lines and it is last iteration
+				tower_a = dynamic_cast<ECTower*>(towers_.at(0));
+				tower_b = dynamic_cast<ECTower*>(towers_.at(i));
+			} else {
+				tower_a = dynamic_cast<ECTower*>(towers_.at(i));
+				tower_b = dynamic_cast<ECTower*>(towers_.at(1+i));
+			}
+			line->ResetLineBetweenTowers(tower_a, tower_b);
+		}
+	}
+
+
+	for (int i = 0; i < buildings_.size(); i++) {
+		ECBuilding* building = dynamic_cast<ECBuilding*>(buildings_.at(i));
+		for (int j = 0; j < lines_.size(); j++) {
+			ECLine* line = dynamic_cast<ECLine*>(lines_.at(j));
+			if (building->CheckCollisionWithLine(line)) {
+				building->SetBuildingLight(LIGHT_ON);
+				CCLOG("YES_CONTACT");
+			} else {
+				building->SetBuildingLight(LIGHT_OFF);
+			}
+		}
+	}
+>>>>>>> 1a81808bd5968c0c1ae37ffaca935af35e2e1570
 
 
 	//for (int t = 1; t < towers_.size(); t++) {
@@ -362,6 +402,7 @@ void ECGameScene::ResetLines()
 	//	}
 
 
+<<<<<<< HEAD
 	for (unsigned int i = 0; i < towers_.size(); i++)
 	{
 		if (i == towers_.size() - 1) //if i points to the last tower in the array
@@ -391,6 +432,46 @@ void ECGameScene::ResetLines()
 			line->ResetLineBetweenTowers(tower_a, tower_b);
 		}
 	}
+=======
+	//for (unsigned int i = 0; i < towers_.size(); i++)
+	//{
+	//	if (i == towers_.size() - 1) //if i points to the last tower in the array
+	//	{
+	//		counter_a = 0; //first tower in array
+	//		counter_b = i; //last tower in array
+	//	}
+	//	else
+	//	{
+	//		counter_a = i;		//couple first
+	//		counter_b = 1 + i;	// couple second
+	//	}
+
+	//	ECTower* tower_a = dynamic_cast<ECTower*>(towers_.at(counter_a));
+	//	ECTower* tower_b = dynamic_cast<ECTower*>(towers_.at(counter_b));
+	//	ECLine* line = NULL;
+
+	//	// i must not point to a greater number than lines` number in the array
+	//	if (i < lines_.size())
+	//	{
+	//		line = dynamic_cast<ECLine*>(lines_.at(i));
+	//	}
+	//
+	//	if (tower_a && tower_b && line)
+	//	{
+	//		// updating line between two towers | position & scaleX
+	//		line->ResetLineBetweenTowers(tower_a, tower_b);
+	//		for (int b = 0; b < buildings_.size(); b++) {
+	//			if (ECBuilding* building = dynamic_cast<ECBuilding*>(buildings_.at(b))) {
+	//				if (building->CheckCollisionWithLine(tower_a, tower_b)) {
+	//					building->SetBuildingLight(LIGHT_ON);
+	//				} else {
+	//					building->SetBuildingLight(LIGHT_OFF);
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+>>>>>>> 1a81808bd5968c0c1ae37ffaca935af35e2e1570
 }
 void ECGameScene::CheckForCollision()
 {
@@ -406,12 +487,19 @@ void ECGameScene::CheckForCollision()
 			ECLine* line = dynamic_cast<ECLine*>(*line_iter);
 			if (line)
 			{
+<<<<<<< HEAD
 				if (building->GetLightState() == LIGHT_ON)
 					building->SetBuildingLight(LIGHT_OFF);
 
 				if (building->CheckCollisionWithLine(line)) {
 					building->SetBuildingLight(LIGHT_ON);
 					game_on_light_counter_++;
+=======
+				if (building->CheckCollisionWithLine(line)) {
+					building->SetBuildingLight(LIGHT_ON);
+				} else {
+					building->SetBuildingLight(LIGHT_OFF);
+>>>>>>> 1a81808bd5968c0c1ae37ffaca935af35e2e1570
 				}
 			}
 		}
