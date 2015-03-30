@@ -1,0 +1,13 @@
+// to-do list
+- Bug in collision
+  + when two lines have contact with the same one building -> win
+- Audio
+  + background music in not playing in >= Android 5.0
+- IO
+  + pugi xml parser does not save xml files in devices (android)
+  + only read mode works
+
+- and more
+-
+-
+-
