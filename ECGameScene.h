@@ -27,6 +27,13 @@ public:
 	
 private:
 
+	//typedef enum {
+	//	PLAYING = 10,
+	//	PAUSE,
+	//	WIN
+	//}GameState;
+
+
 	typedef enum {
 		Z_BACKGROUND = 50,
 		Z_BUILDING,
@@ -58,7 +65,7 @@ private:
 	// instead of making elements global fields -> accessed by tags
 	typedef enum {
 		//labels
-		T_LEVEL_TIME_LABEL = 200,
+		T_LEVEL_TIME_LABEL = 150,
 		T_LEVEL_BEST_TIME_LABEL,
 		T_LEVEL_LIGHTS_COUNTER,
 		
@@ -86,8 +93,8 @@ private:
 	void CreateLines(bool is_lines_loop);
 	void ResetLines();
 	void ResetGameObjectsOfType(NodeType node_type);
-	void CheckForCollision();
-	void CheckForWinState();
+	bool CheckForCollision();
+	bool CheckForWinState();
 
 	// ui control methods
 	void PauseGame(CCObject* pSender);			/*! < main method that pauses the level and calls other methods
@@ -199,8 +206,7 @@ private:
 	float temp_final_game_score_;
 	CCLabelBMFont* temp_label_;  /*! < a temporary label that used in LabelUpdateTimer method to create timer like effect (animation only)
 								 on score and best_score labels */
-	int game_on_light_counter_;
-
+	int on_light_building_counter_;
 	ECAudioManager* audio_manager_;
 };	
 #endif// __EC_GAME_SCENE_H__

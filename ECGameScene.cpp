@@ -24,9 +24,9 @@ ECGameScene::ECGameScene() :
 	game_level_data_(NULL),
 	current_level_(""),
 	game_timer_(0),
-	game_on_light_counter_(0),
 	temp_label_(NULL),
-	temp_final_game_score_(0)
+	temp_final_game_score_(0),
+	on_light_building_counter_(0)
 {
 
 }
@@ -80,7 +80,7 @@ ECGameScene* ECGameScene::SharedGameLayer()
 }
 bool ECGameScene::InitGameLayerToLayer(std::string& level)
 {
-	bool _isSuccess = false;
+	bool is_success = false;
 	do
 	{
 		CC_BREAK_IF(!CCLayer::init());
@@ -173,30 +173,29 @@ bool ECGameScene::InitGameLayerToLayer(std::string& level)
 
 		this->scheduleUpdate();
 
-		_isSuccess = true;
+		is_success = true;
 	}while(0);
-	return _isSuccess;
+	return is_success;
 }
 void ECGameScene::update(float delta)
 {
 	// loop through towers and find moving ones then update line
-	/*for (unsigned int i = 0; i < towers_.size(); i++)
+	for (unsigned int i = 0; i < towers_.size(); i++)
 	{
 		ECTower* tower = static_cast<ECTower*>(towers_.at(i));
-		if (tower->GetTowerState() == ON_TOWER_MOVED || tower->GetTowerState() == ON_TOWER_ENDED)
+		if (tower->GetTowerState() == ON_TOWER_TOUCH_MOVED || tower->GetTowerState() == ON_TOWER_TOUCH_ENDED)
 		{
 			this->ResetLines();
-			this->CheckForCollision();
+			if (this->CheckForCollision())
+				break;
 		}
 	}
+	
 	//this->ResetLines();
-	}*/
-	this->ResetLines();
-
 	//this->CheckForCollision();
 
 	// check for win state
-	this->CheckForWinState();
+	//this->CheckForWinState();
 
 	// timer, updating game timer label
 	game_timer_ += delta;
@@ -319,81 +318,6 @@ void ECGameScene::ResetLines()
 	int counter_a = 0;
 	int counter_b = 0;
 
-//	ECTower* tower_a = NULL;
-//	ECTower* tower_b = NULL;
-//	for (int i = 0; i < lines_.size(); i++) {
-//		if (ECLine* line = dynamic_cast<ECLine*>(lines_.at(i))) {
-//			if ((lines_.size() == towers_.size()) && (i == lines_.size() - 1)) { //if we have same amount of towers & lines and it is last iteration
-//				tower_a = dynamic_cast<ECTower*>(towers_.at(0));
-//				tower_b = dynamic_cast<ECTower*>(towers_.at(i));
-//			} else {
-//				tower_a = dynamic_cast<ECTower*>(towers_.at(i));
-//				tower_b = dynamic_cast<ECTower*>(towers_.at(1+i));
-//			}
-//			line->ResetLineBetweenTowers(tower_a, tower_b);
-//		}
-//	}
-//
-//
-//	for (int i = 0; i < buildings_.size(); i++) {
-//		ECBuilding* building = dynamic_cast<ECBuilding*>(buildings_.at(i));
-//		for (int j = 0; j < lines_.size(); j++) {
-//			ECLine* line = dynamic_cast<ECLine*>(lines_.at(j));
-//			if (building->CheckCollisionWithLine(line)) {
-//				building->SetBuildingLight(LIGHT_ON);
-//				CCLOG("YES_CONTACT");
-//			} else {
-//				building->SetBuildingLight(LIGHT_OFF);
-//			}
-//		}
-//	}
-
-	ECTower* tower_a = NULL;
-	ECTower* tower_b = NULL;
-	for (int i = 0; i < lines_.size(); i++) {
-		if (ECLine* line = dynamic_cast<ECLine*>(lines_.at(i))) {
-			if ((lines_.size() == towers_.size()) && (i == lines_.size() - 1)) { //if we have same amount of towers & lines and it is last iteration
-				tower_a = dynamic_cast<ECTower*>(towers_.at(0));
-				tower_b = dynamic_cast<ECTower*>(towers_.at(i));
-			} else {
-				tower_a = dynamic_cast<ECTower*>(towers_.at(i));
-				tower_b = dynamic_cast<ECTower*>(towers_.at(1+i));
-			}
-			line->ResetLineBetweenTowers(tower_a, tower_b);
-		}
-	}
-
-
-	for (int i = 0; i < buildings_.size(); i++) {
-		ECBuilding* building = dynamic_cast<ECBuilding*>(buildings_.at(i));
-		for (int j = 0; j < lines_.size(); j++) {
-			ECLine* line = dynamic_cast<ECLine*>(lines_.at(j));
-			if (building->CheckCollisionWithLine(line)) {
-				building->SetBuildingLight(LIGHT_ON);
-				CCLOG("YES_CONTACT");
-			} else {
-				building->SetBuildingLight(LIGHT_OFF);
-			}
-		}
-	}
-
-
-	//for (int t = 1; t < towers_.size(); t++) {
-	//	ECTower* tower_1 = dynamic_cast<ECTower*>(towers_.at(t - 1));
-	//	ECTower* tower_2 = dynamic_cast<ECTower*>(towers_.at(t));
-	//	for (int b = 0; b < buildings_.size(); b++) {
-	//			if (ECBuilding* building = dynamic_cast<ECBuilding*>(buildings_.at(b))) {
-	//				
-	//				bool contact = building->CheckCollisionWithLine(tower_1, tower_2);
-	//				if (contact) {
-	//					building->SetBuildingLight(LIGHT_ON);
-	//				} else {
-	//					building->SetBuildingLight(LIGHT_OFF);
-	//				}
-	//			}
-	//		}
-	//	}
-
 	for (unsigned int i = 0; i < towers_.size(); i++)
 	{
 		if (i == towers_.size() - 1) //if i points to the last tower in the array
@@ -423,91 +347,53 @@ void ECGameScene::ResetLines()
 			line->ResetLineBetweenTowers(tower_a, tower_b);
 		}
 	}
-
-	//for (unsigned int i = 0; i < towers_.size(); i++)
-	//{
-	//	if (i == towers_.size() - 1) //if i points to the last tower in the array
-	//	{
-	//		counter_a = 0; //first tower in array
-	//		counter_b = i; //last tower in array
-	//	}
-	//	else
-	//	{
-	//		counter_a = i;		//couple first
-	//		counter_b = 1 + i;	// couple second
-	//	}
-
-	//	ECTower* tower_a = dynamic_cast<ECTower*>(towers_.at(counter_a));
-	//	ECTower* tower_b = dynamic_cast<ECTower*>(towers_.at(counter_b));
-	//	ECLine* line = NULL;
-
-	//	// i must not point to a greater number than lines` number in the array
-	//	if (i < lines_.size())
-	//	{
-	//		line = dynamic_cast<ECLine*>(lines_.at(i));
-	//	}
-	//
-	//	if (tower_a && tower_b && line)
-	//	{
-	//		// updating line between two towers | position & scaleX
-	//		line->ResetLineBetweenTowers(tower_a, tower_b);
-	//		for (int b = 0; b < buildings_.size(); b++) {
-	//			if (ECBuilding* building = dynamic_cast<ECBuilding*>(buildings_.at(b))) {
-	//				if (building->CheckCollisionWithLine(tower_a, tower_b)) {
-	//					building->SetBuildingLight(LIGHT_ON);
-	//				} else {
-	//					building->SetBuildingLight(LIGHT_OFF);
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
 }
-void ECGameScene::CheckForCollision()
+bool ECGameScene::CheckForCollision()
 {
-	game_on_light_counter_ = 0;
+	for (int i = 0; i < lines_.size(); i++) {
+		ECLine* line = dynamic_cast<ECLine*>(lines_.at(i));
+		for (int j = 0; j < buildings_.size(); j++) {
+			ECBuilding* building = dynamic_cast<ECBuilding*>(buildings_.at(j));
 
-	std::vector<CCSprite*>::iterator building_iter;
-	std::vector<CCSprite*>::iterator line_iter;
-	for (building_iter = buildings_.begin(); building_iter != buildings_.end(); building_iter++)
-	{
-		ECBuilding* building = dynamic_cast<ECBuilding*>(*building_iter);
-		for (line_iter = lines_.begin(); line_iter != lines_.end(); line_iter++)
-		{
-			ECLine* line = dynamic_cast<ECLine*>(*line_iter);
-			if (line)
-			{
-				if (building->GetLightState() == LIGHT_ON)
-					building->SetBuildingLight(LIGHT_OFF);
-
-				if (building->CheckCollisionWithLine(line)) {
-					building->SetBuildingLight(LIGHT_ON);
-					game_on_light_counter_++;
-				if (building->CheckCollisionWithLine(line)) {
-					building->SetBuildingLight(LIGHT_ON);
-				} else {
-					building->SetBuildingLight(LIGHT_OFF);
-				}
+			if (line->CheckCollisionWithBuilding(building) && building->GetContactState() == NO_CONTACT) {
+				building->SetContactedLineIndex(i);
+				building->SetContactState(YES_CONTACT);
+				building->SetBuildingLight(LIGHT_ON);
+				on_light_building_counter_++;
+			}
+			else if (!line->CheckCollisionWithBuilding(building) && building->GetContactedLineIndex() == i) {
+				building->SetContactedLineIndex(-1);
+				building->SetContactState(NO_CONTACT);
+				building->SetBuildingLight(LIGHT_OFF);
+				on_light_building_counter_--;
 			}
 		}
 	}
-	}
+
+	// check for win state inside collision
+	//CheckForWinState();
+
 	// update on lights counter
 	CCLabelBMFont* on_light_counter_label = (CCLabelBMFont*)this->getChildByTag(T_LEVEL_LIGHTS_COUNTER);
-	on_light_counter_label->setString(CCString::createWithFormat("%i | %i", game_on_light_counter_, buildings_.size())->getCString());
+	on_light_counter_label->setString(CCString::createWithFormat("%i | %i", on_light_building_counter_, buildings_.size())->getCString());
+	
+	return CheckForWinState();
 }
-void ECGameScene::CheckForWinState() {
-
+bool ECGameScene::CheckForWinState() {
+	
 	// win situation
-	if (game_on_light_counter_ == buildings_.size()) {
+	if (on_light_building_counter_ == buildings_.size()) {
+		CCLOG("WIN");
 		// unschedule update, disable touch on towers
 		this->PauseGameLoop(true);
-		CCCallFunc* callPauseGameFunction = CCCallFunc::create(this, callfunc_selector(ECGameScene::WinGame));
+		CCCallFunc* call_pause_game_function = CCCallFunc::create(this, callfunc_selector(ECGameScene::WinGame));
 		// delay to show win sprites, just for effect
-		CCDelayTime* delayBeforePausGameFunctionCall = CCDelayTime::create(0.5f);
-		CCSequence* sequence = CCSequence::create(delayBeforePausGameFunctionCall, callPauseGameFunction, NULL);
+		CCDelayTime* delay_before_pause_game_function_call = CCDelayTime::create(0.5f);
+		CCSequence* sequence = CCSequence::create(delay_before_pause_game_function_call, call_pause_game_function, NULL);
 		this->runAction(sequence);
+		return true;
 	}
+	return false;
 		//CCLOG("COUNTER: %i", _gameLightsCounter);
 }
 void ECGameScene::PauseGame(CCObject* pSender) {
