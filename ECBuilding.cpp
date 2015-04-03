@@ -10,6 +10,7 @@ ECBuilding::ECBuilding()
 {
 	light_state_	= LIGHT_OFF;
 	contact_state_	= NO_CONTACT;
+	contacted_line_index_ = -1;
 }
 ECBuilding::~ECBuilding()
 {
@@ -48,62 +49,6 @@ bool ECBuilding::InitBuildingWithFileName(const std::string& filename)
 	}while(0);
 	return is_success;
 }
-bool ECBuilding::CheckCollisionWithLine(ECLine* line)
-{
-	CCPoint line_begin_point = line->getPosition();
-	CCPoint line_end_point = line->GetLineEndPoint();
-
-	float scale = this->getScale();
-
-	CCPoint pLeftBottom = ccp(this->getPosition().x - (this->getContentSize().width * (0.09375f * scale)),
-										this->getPosition().y + (this->getContentSize().height * (0.269231f * scale)));
-	CCPoint pLeftTop = ccp(pLeftBottom.x, pLeftBottom.y + (this->getContentSize().height * (0.15385f * scale)));
-	CCPoint pRightTop = ccp(pLeftTop.x + (this->getContentSize().width * (0.125f * scale)), pLeftTop.y);
-	CCPoint pRightBottom = ccp(pRightTop.x, pLeftBottom.y);	
-
-	float s;
-	float t;
-
-	if ((ccpLineIntersect(line_begin_point, line_end_point, pLeftBottom, pLeftTop, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) ||
-		(ccpLineIntersect(line_begin_point, line_end_point, pLeftTop, pRightTop, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) ||
-		(ccpLineIntersect(line_begin_point, line_end_point, pRightTop, pRightBottom, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) || 
-		(ccpLineIntersect(line_begin_point, line_end_point, pRightBottom, pLeftBottom, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1)) 
-	{
-		return true;
-	}
-	return false;
-}
-bool ECBuilding::CheckCollisionWithLine(ECTower* tower_a, ECTower* tower_b)
-{
-	// points that represents the distance between to towers  TOWER_A <--------> TOWER_B
-	CCPoint tower_a_point = ccp(tower_a->getPosition().x - (tower_a->getContentSize().width * 0.5f * 0.116f),
-							    tower_a->getPosition().y + (tower_a->getContentSize().height * 0.37f));
-	CCPoint tower_b_point = ccp(tower_b->getPosition().x - (tower_b->getContentSize().width * 0.5f * 0.116f),
-							    tower_b->getPosition().y + (tower_b->getContentSize().height * 0.37f));
-
-	float scale = this->getScale();
-
-	CCPoint left_bottom_point	= ccp(this->getPosition().x - (this->getContentSize().width * (0.09375f * scale)),
-									  this->getPosition().y + (this->getContentSize().height * (0.269231f * scale)));
-	CCPoint left_top_point		= ccp(left_bottom_point.x, left_bottom_point.y + (this->getContentSize().height * (0.15385f * scale)));
-	CCPoint right_top_point		= ccp(left_top_point.x + (this->getContentSize().width * (0.125f * scale)), left_top_point.y);
-	CCPoint right_bottom_point	= ccp(right_top_point.x, left_bottom_point.y);	
-
-	float s = 0;
-	float t = 0;
-
-	
-	if ((ccpLineIntersect(tower_a_point, tower_b_point, left_bottom_point, left_top_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) ||
-		(ccpLineIntersect(tower_a_point, tower_b_point, left_top_point, right_top_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) ||
-		(ccpLineIntersect(tower_a_point, tower_b_point, right_top_point, right_bottom_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) || 
-		(ccpLineIntersect(tower_a_point, tower_b_point, left_bottom_point, right_bottom_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1)) 
-	{
-		contact_state_ = YES_CONTACT;
-		return true;
-	}
-	contact_state_ = NO_CONTACT;
-	return false;
-}
 void ECBuilding::SetBuildingLight(LightState state)
 {
 	// create on an image file name
@@ -134,6 +79,17 @@ void ECBuilding::SetBuildingLight(LightState state)
 int ECBuilding::GetLightState() {
 	return light_state_;
 }
-int ECBuilding::GetContactState() {
+void ECBuilding::SetContactState(ContactState state) {
+	contact_state_ = state;
+}
+int ECBuilding::GetContactState() const{
 	return contact_state_;
 }
+void ECBuilding::SetContactedLineIndex(int index) {
+	contacted_line_index_ = index;
+}
+int ECBuilding::GetContactedLineIndex() const {
+	return contacted_line_index_;
+}
+
+

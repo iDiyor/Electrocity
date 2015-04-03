@@ -35,13 +35,20 @@ public:
 	bool CheckCollisionWithLine(ECTower* tower_a, ECTower* tower_b);
 	void SetBuildingLight(LightState state);
 	int GetLightState();
-	int GetContactState();
+
+	void SetContactState(ContactState state);
+	int GetContactState() const;
+	
+	void SetContactedLineIndex(int index);
+	int GetContactedLineIndex() const;
+
 
 private:
 	std::string building_image_filename_for_on_state_;
 	std::string building_image_filename_for_off_state_;
 	int light_state_;
 	int contact_state_;
+	int contacted_line_index_;  // index that points to the line position in the lines_ array
 };
 
 
