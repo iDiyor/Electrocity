@@ -8,9 +8,9 @@
 using namespace cocos2d;
 
 typedef enum  {
-	ON_TOWER_BEGIN = 101,
-	ON_TOWER_MOVED,
-	ON_TOWER_ENDED
+	ON_TOWER_TOUCH_BEGIN = 101,
+	ON_TOWER_TOUCH_MOVED,
+	ON_TOWER_TOUCH_ENDED
 }TowerState;
 
 class ECTower : public CCSprite, public CCTargetedTouchDelegate
