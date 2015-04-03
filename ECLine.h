@@ -8,6 +8,7 @@
 using namespace cocos2d;
 
 class ECTower;
+class ECBuilding;
 
 class ECLine : public CCSprite
 {
@@ -19,11 +20,12 @@ public:
 	~ECLine();
 	
 	void ResetLineBetweenTowers(ECTower* tower_a, ECTower* tower_b);
+	bool CheckCollisionWithBuilding(ECBuilding* building);
 
 	CCPoint GetLineEndPoint();
 private:
 
-	//CCPoint _beginLinePoint;
+	CCPoint line_start_point_;
 	CCPoint line_end_point_;
 };
 #endif //__EC_LINE_H__
