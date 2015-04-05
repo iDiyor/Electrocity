@@ -62,8 +62,8 @@ private:
 	// returns location of file on different platforms (Win32, Android)
 	std::string GetPathToFile(std::string filename);
 
-	xml_document doc_file_;
-	xml_node	level_data_;
+	xml_document *doc_file_;
+	xml_node	*level_data_;
 	std::string file_name_;
 };
 #endif //__EC_DATA_PROVIDER_EXT__

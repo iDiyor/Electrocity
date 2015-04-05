@@ -21,12 +21,14 @@ ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::st
 	unsigned long buffer_size = 0;
 	p_buffer = CCFileUtils::sharedFileUtils()->getFileData(fullFilePath.c_str(), "r+", &buffer_size);
 	
-	xml_parse_result result = doc_file_.load_buffer(p_buffer, buffer_size);
+	doc_file_ 	= new xml_document();
+
+	xml_parse_result result = doc_file_->load_buffer(p_buffer, buffer_size);
 	
 	if (result) {
 		CCLOG("%s : Loaded successfully: %s", file_name.c_str(), result.description());
 		// assining loaded level and finding selected level data
-		level_data_ = doc_file_.child(parent_node.c_str()).child(child_node.c_str());
+		level_data_ = new xml_node(doc_file_->child(parent_node.c_str()).child(child_node.c_str()));
 		file_name_ = file_name;
 	} else {
 		CCLOG("%s : Error description: %s" , file_name.c_str() ,result.description());
@@ -49,12 +51,14 @@ ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::st
 	unsigned long buffer_size = 0;
 	p_buffer = CCFileUtils::sharedFileUtils()->getFileData(full_file_path.c_str(), "r+", &buffer_size);
 	
-	xml_parse_result result = doc_file_.load_buffer(p_buffer, buffer_size);
+	doc_file_ 	= new xml_document();
+
+	xml_parse_result result = doc_file_->load_buffer(p_buffer, buffer_size);
 	
 	if (result) {
 		CCLOG("%s : Loaded successfully: %s", file_name.c_str(), result.description());
 		// assining loaded level and finding selected level data
-		level_data_ = doc_file_.child(parent_node.c_str());
+		level_data_ = new xml_node(doc_file_->child(parent_node.c_str()));
 		file_name_ = file_name;
 	} else {
 		CCLOG("%s : Error description: %s" , file_name.c_str() ,result.description());
@@ -62,16 +66,20 @@ ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::st
 }
 ECDataProviderExt::~ECDataProviderExt()
 {
+	delete level_data_;
+	level_data_ = NULL;
 
+	delete doc_file_;
+	doc_file_ = NULL;
 }
 void ECDataProviderExt::SaveFile() {
 	std::string full_file_path = GetPathToFile(file_name_);
 	CCLOG("FILE_PATH: %s", full_file_path.c_str());
-	doc_file_.save_file(full_file_path.c_str());
+	doc_file_->save_file(full_file_path.c_str());
 }
 void ECDataProviderExt::LoadPositionXYOfBuildings(std::vector<CCPoint>& dest_vector)
 {
-	xml_node buildings = level_data_.child("buildings");
+	xml_node buildings = level_data_->child("buildings");
 	for (xml_node_iterator it = buildings.begin(); it != buildings.end(); ++it)
 		{
 			float positionX = it->attribute("pos_x").as_float();
@@ -82,7 +90,7 @@ void ECDataProviderExt::LoadPositionXYOfBuildings(std::vector<CCPoint>& dest_vec
 }
 void ECDataProviderExt::LoadPositionXYOfTowers(std::vector<CCPoint>& dest_vector)
 {
-	xml_node towers = level_data_.child("towers");
+	xml_node towers = level_data_->child("towers");
 	for (xml_node_iterator it = towers.begin(); it != towers.end(); ++it)
 		{
 			float positionX = it->attribute("pos_x").as_float();
@@ -98,10 +106,10 @@ void ECDataProviderExt::LoadNodeAttributesForNodeType(NodeType node_type, int* i
 	switch (node_type)	
 	{
 	case TYPE_BUILDING:
-		node = level_data_.child("buildings");
+		node = level_data_->child("buildings");
 		break;
 	case TYPE_TOWER:
-		node = level_data_.child("towers");
+		node = level_data_->child("towers");
 		break;
 	}
 
@@ -118,7 +126,7 @@ void ECDataProviderExt::LoadNodeAttributesForNodeType(NodeType node_type, int* i
 }
 bool ECDataProviderExt::LoadLinesLoopAttribute()
 {
-	xml_node lines = level_data_.child("lines");
+	xml_node lines = level_data_->child("lines");
 	return lines.attribute("loop_closed").as_bool();
 }
 /*****************************************************************************************
@@ -126,7 +134,7 @@ bool ECDataProviderExt::LoadLinesLoopAttribute()
 void ECDataProviderExt::LoadDataForLevelSelectButtons(std::vector<int>& v_open_buttons, 
 													 std::map<int, int>& mp_played_with_stars_buttons) {
 	int count = 1;
-	for (xml_node_iterator it = level_data_.begin(); it != level_data_.end(); ++it) {
+	for (xml_node_iterator it = level_data_->begin(); it != level_data_->end(); ++it) {
 		
 		count++;
 
@@ -154,13 +162,13 @@ void ECDataProviderExt::LoadDataForLevelSelectButtons(std::vector<int>& v_open_b
 	count = 1;
 }
 void ECDataProviderExt::SetPlayedLevel(const std::string& level, bool is_played) {
-	xml_node level_node = level_data_.child(level.c_str());
+	xml_node level_node = level_data_->child(level.c_str());
 	level_node.attribute("is_played").set_value(is_played);
 
 	CCLOG("Level: %s" , level.c_str());
 }
 void ECDataProviderExt::SetStarsNumberForLevel(const std::string& level, const int stars_number) {
-	xml_node level_node = level_data_.child(level.c_str());
+	xml_node level_node = level_data_->child(level.c_str());
 	level_node.attribute("number_of_stars").set_value(stars_number);
 	CCLOG("Level: %s |Stars #: %i" , level.c_str(), stars_number);
 }
@@ -169,7 +177,7 @@ void ECDataProviderExt::SetPlayedAndStarsOnLevelButton(const std::string& level,
 	this->SetStarsNumberForLevel(level, stars_number);
 }
 void ECDataProviderExt::SetBlockForLevel(const std::string& level, bool is_blocked) {
-	xml_node level_node = level_data_.child(level.c_str());
+	xml_node level_node = level_data_->child(level.c_str());
 	level_node.attribute("is_blocked").set_value(is_blocked);
 }
 std::string ECDataProviderExt::GetPathToFile(std::string filename) {
