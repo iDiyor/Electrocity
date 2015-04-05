@@ -3,6 +3,7 @@
 #include "ECMainMenuScene.h"
 #include "ECSceneManager.h"
 #include "ECDataProvider.h"
+#include "ECDataProviderExt.h"
 #include "ECAudioManager.h"
 
 ECMainMenuLayer::ECMainMenuLayer()
@@ -106,6 +107,8 @@ bool ECMainMenuLayer::init()
 			audio_manager_->MusicSetting(true);
 			audio_manager_->SoundSetting(true);
 			ECDataProvider::SetGameLaunchCounter(1);
+
+			ECDataProviderExt::MoveXMLFileFromAssetsToWritabalePath("level_state.xml");
 		}
 
 		is_success = true;
