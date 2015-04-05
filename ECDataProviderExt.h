@@ -32,6 +32,7 @@ public:
 	*/
 	void SaveFile();
 
+
 	/**********************************
 	* Methods related to game scene
 	**********************************/
@@ -54,7 +55,13 @@ public:
 	* current level is completed. Enables next level button icon.
 	*/
 	void SetBlockForLevel(const std::string& level, bool is_blocked);
+
+	static void MoveXMLFileFromAssetsToWritabalePath(std::string filename);
 private:
+
+	// returns location of file on different platforms (Win32, Android)
+	std::string GetPathToFile(std::string filename);
+
 	xml_document doc_file_;
 	xml_node	level_data_;
 	std::string file_name_;

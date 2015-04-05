@@ -5,6 +5,10 @@
 
 USING_NS_CC;
 
+/**
+ * This constructor load file from sandbox which is read-only (level data only)
+ */
+
 ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::string& parent_node, const std::string& child_node)
 {
 	// method #1
@@ -13,11 +17,11 @@ ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::st
 
 	// method #2
 	std::string fullFilePath = CCFileUtils::sharedFileUtils()->fullPathForFilename(file_name.c_str());
-	unsigned char* pBuffer = NULL;
-	unsigned long bufferSize = 0;
-	pBuffer = CCFileUtils::sharedFileUtils()->getFileData(fullFilePath.c_str(), "r", &bufferSize);
+	unsigned char* p_buffer = NULL;
+	unsigned long buffer_size = 0;
+	p_buffer = CCFileUtils::sharedFileUtils()->getFileData(fullFilePath.c_str(), "r+", &buffer_size);
 	
-	xml_parse_result result = doc_file_.load_buffer(pBuffer, bufferSize);
+	xml_parse_result result = doc_file_.load_buffer(p_buffer, buffer_size);
 	
 	if (result) {
 		CCLOG("%s : Loaded successfully: %s", file_name.c_str(), result.description());
@@ -28,6 +32,10 @@ ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::st
 		CCLOG("%s : Error description: %s" , file_name.c_str() ,result.description());
 	}
 }
+/**
+ * This constructor loads file from writeable path which has read-write-execute permission to all files inside (level icons data only)
+ */
+
 ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::string& parent_node)
 {
 	// method #1
@@ -35,12 +43,13 @@ ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::st
 	//xml_parse_result result = doc_file_.load_file(filePath.c_str());
 
 	// method #2
-	std::string fullFilePath = CCFileUtils::sharedFileUtils()->fullPathForFilename(file_name.c_str());
-	unsigned char* pBuffer = NULL;
-	unsigned long bufferSize = 0;
-	pBuffer = CCFileUtils::sharedFileUtils()->getFileData(fullFilePath.c_str(), "r+", &bufferSize);
+	//std::string fullFilePath = CCFileUtils::sharedFileUtils()->fullPathForFilename(file_name.c_str());
+	std::string full_file_path = GetPathToFile(file_name);
+	unsigned char* p_buffer = NULL;
+	unsigned long buffer_size = 0;
+	p_buffer = CCFileUtils::sharedFileUtils()->getFileData(full_file_path.c_str(), "r+", &buffer_size);
 	
-	xml_parse_result result = doc_file_.load_buffer(pBuffer, bufferSize);
+	xml_parse_result result = doc_file_.load_buffer(p_buffer, buffer_size);
 	
 	if (result) {
 		CCLOG("%s : Loaded successfully: %s", file_name.c_str(), result.description());
@@ -56,11 +65,9 @@ ECDataProviderExt::~ECDataProviderExt()
 
 }
 void ECDataProviderExt::SaveFile() {
-	std::string fullFilePath = CCFileUtils::sharedFileUtils()->fullPathForFilename(file_name_.c_str());
-	//CCLOG("PATH: %s", fullFilePath.c_str());
-	int n = level_data_.child("level2").attribute("number_of_stars").as_int();
-	CCLOG("STARS_NUMBER: %i", n);
-	doc_file_.save_file(fullFilePath.c_str());
+	std::string full_file_path = GetPathToFile(file_name_);
+	CCLOG("FILE_PATH: %s", full_file_path.c_str());
+	doc_file_.save_file(full_file_path.c_str());
 }
 void ECDataProviderExt::LoadPositionXYOfBuildings(std::vector<CCPoint>& dest_vector)
 {
@@ -164,4 +171,41 @@ void ECDataProviderExt::SetPlayedAndStarsOnLevelButton(const std::string& level,
 void ECDataProviderExt::SetBlockForLevel(const std::string& level, bool is_blocked) {
 	xml_node level_node = level_data_.child(level.c_str());
 	level_node.attribute("is_blocked").set_value(is_blocked);
+}
+std::string ECDataProviderExt::GetPathToFile(std::string filename) {
+
+	std::string path = "";
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+	path = CCFileUtils::sharedFileUtils()->getWritablePath();
+	path = path + filename;
+#else
+	path = CCFileUtils::sharedFileUtils()->fullPathForFilename(filename.c_str());
+#endif
+	return path;
+}
+void ECDataProviderExt::MoveXMLFileFromAssetsToWritabalePath(std::string filename) {
+	std::string path_to_file = CCFileUtils::sharedFileUtils()->fullPathForFilename(filename.c_str());
+	std::string writable_path_to_move_file = CCFileUtils::sharedFileUtils()->getWritablePath() + filename;
+	if (CCFileUtils::sharedFileUtils()->isFileExist(writable_path_to_move_file)) {
+		return;
+	} else {
+		// if the file is not in writeable path
+		unsigned char* pBuffer = NULL;
+		unsigned long bufferSize = 0;
+		pBuffer = CCFileUtils::sharedFileUtils()->getFileData(path_to_file.c_str(), "r+", &bufferSize);
+
+		xml_document doc_file;
+		xml_node file_content;
+
+		xml_parse_result result = doc_file.load_buffer(pBuffer, bufferSize);
+
+		if (result) {
+			CCLOG("%s : Loaded successfully: %s", filename.c_str(), result.description());
+			// assining loaded level and finding selected level data
+			doc_file.save_file(writable_path_to_move_file.c_str());
+		} else {
+			CCLOG("%s : Error description: %s" , filename.c_str() ,result.description());
+		}
+
+	}
 }
