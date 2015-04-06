@@ -22,8 +22,8 @@ ECMainMenuLayer::~ECMainMenuLayer()
 	*/
 	CCSpriteFrameCache::sharedSpriteFrameCache()->removeSpriteFramesFromFile("main_menu_spritesheet.plist");	
 
-	delete audio_manager_;
-	audio_manager_ = NULL;
+	//delete audio_manager_;
+	//audio_manager_ = NULL;
 }
 CCScene* ECMainMenuLayer::scene()
 {
@@ -48,7 +48,10 @@ bool ECMainMenuLayer::init()
 	{
 		CC_BREAK_IF(!CCLayer::init());
 
-		screen_size_ = CCDirector::sharedDirector()->getWinSize();
+		CCSize visible_size = CCDirector::sharedDirector()->getVisibleSize();
+		CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
+
+		screen_size_ = CCSize(origin.x + visible_size.width, origin.y + visible_size.height);
 
 		CCTexture2D::PVRImagesHavePremultipliedAlpha(true);
 		// main menu spritesheet
@@ -60,6 +63,19 @@ bool ECMainMenuLayer::init()
 		CCSprite* background = CCSprite::createWithSpriteFrameName("main_menu_background.png");
 		background->setAnchorPoint(ccp(0,0));
 		main_menu_spritesheet->addChild(background);
+
+		// game label
+		CCSprite* electrocity_title = CCSprite::createWithSpriteFrameName("game_title.png");
+		electrocity_title->setPosition(ccp(screen_size_.width * 0.5f, screen_size_.height * 0.8f));
+		main_menu_spritesheet->addChild(electrocity_title);
+		CCMoveBy* move_by_down_electrocity_title = CCMoveBy::create(1.35f, ccp(0, electrocity_title->getContentSize().height * 0.075f * -1));
+		CCMoveBy* move_by_up_electrocity_title = CCMoveBy::create(1.35f, ccp(0, electrocity_title->getContentSize().height * 0.075f));
+		CCScaleTo* scale_to_up_electrocity_title = CCScaleTo::create(1.35f, 1.05f);
+		CCScaleTo* scale_to_down_electrocity_title = CCScaleTo::create(1.35f, 1.0f);
+		CCSpawn* spawn_move_down_and_scale_up = CCSpawn::create(move_by_down_electrocity_title, scale_to_up_electrocity_title, NULL);
+		CCSpawn* spawn_move_up_and_scale_down = CCSpawn::create(move_by_up_electrocity_title, scale_to_down_electrocity_title, NULL);
+		CCSequence* sequence_electrocity_titile = CCSequence::create(spawn_move_down_and_scale_up, spawn_move_up_and_scale_down, NULL);
+		electrocity_title->runAction(CCRepeatForever::create(sequence_electrocity_titile));
 
 		// play button
 		CCSprite* play_button_sprite = CCSprite::createWithSpriteFrameName("play.png");
@@ -101,11 +117,12 @@ bool ECMainMenuLayer::init()
 		this->addChild(menu);
 
 		// audio
-		audio_manager_ = ECAudioManager::CreateAudioManagerForScene(MAIN_MENU_SCENE_AUDIO);
-		audio_manager_->PlayBackgroundMusic();
+		//audio_manager_ = ECAudioManager::CreateAudioManagerForScene(MAIN_MENU_SCENE_AUDIO);
+		//audio_manager_->PlayBackgroundMusic();
+		ECAudioManager::PlayBackgroundMusic(GAME_SCENE_AUDIO);
 		if (ECDataProvider::GetGameLaunchCounter() == 0) {
-			audio_manager_->MusicSetting(true);
-			audio_manager_->SoundSetting(true);
+			ECAudioManager::MusicSetting(true, MAIN_MENU_SCENE_AUDIO);
+			ECAudioManager::SoundSetting(true);
 			ECDataProvider::SetGameLaunchCounter(1);
 
 			ECDataProviderExt::MoveXMLFileFromAssetsToWritabalePath("level_state.xml");
@@ -122,25 +139,25 @@ void ECMainMenuLayer::onButtonClicked(CCObject* pSender)
 	{
 	case T_PLAY:
 		{
-			audio_manager_->PlayButtonClickSound();
+			ECAudioManager::PlayButtonClickSound(MAIN_MENU_SCENE_AUDIO);
 			ECSceneManager::GoLevelSelectScene();
 		}
 		break;
 	case T_SETTINGS:
 		{
-			audio_manager_->PlayButtonClickSound();
+			ECAudioManager::PlayButtonClickSound(MAIN_MENU_SCENE_AUDIO);
 			ECSceneManager::GoSettingsSceneWithoutLoadingScene();
 		}
 		break;
 	case T_LEADERBOARDS:
 		{
-			audio_manager_->PlayButtonClickSound();
+			ECAudioManager::PlayButtonClickSound(MAIN_MENU_SCENE_AUDIO);
 			ECSceneManager::GoSettingsScene();
 		}
 		break;
 	default:
 		{
-			audio_manager_->PlayButtonClickSound();
+			ECAudioManager::PlayButtonClickSound(MAIN_MENU_SCENE_AUDIO);
 			ECSceneManager::GoLevelSelectScene();
 		}
 		break;

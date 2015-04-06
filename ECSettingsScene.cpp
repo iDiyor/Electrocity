@@ -22,8 +22,8 @@ ECSettingsScene::~ECSettingsScene(){
 	*/
 	CCSpriteFrameCache::sharedSpriteFrameCache()->removeSpriteFramesFromFile("settings_spritesheet.plist");
 
-	delete audio_manager_;
-	audio_manager_ = NULL;
+	//delete audio_manager_;
+	//audio_manager_ = NULL;
 }
 
 CCScene* ECSettingsScene::scene() {
@@ -46,8 +46,10 @@ bool ECSettingsScene::init() {
   do {
 		CC_BREAK_IF(!CCLayer::init());
     
-		screen_size_ = CCDirector::sharedDirector()->getWinSize();
-    
+		CCSize visible_size = CCDirector::sharedDirector()->getVisibleSize();
+		CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
+
+		screen_size_ = CCSize(origin.x + visible_size.width, origin.y + visible_size.height);
 
 		CCTexture2D::PVRImagesHavePremultipliedAlpha(true);
 		CCSpriteFrameCache::sharedSpriteFrameCache()->addSpriteFramesWithFile("settings_spritesheet.plist");
@@ -120,7 +122,7 @@ bool ECSettingsScene::init() {
 																	 NULL,
 																	 this,
 																	 menu_selector(ECSettingsScene::OnTrashcanClicked));
-		trashcan_button->setPosition(ccp(screen_size_.width * 0.188f, screen_size_.height * 0.13f));
+		trashcan_button->setPosition(ccp(screen_size_.width * 0.9f, screen_size_.height * 0.15f));
 
 		// main menu back button
 		CCSprite* back_button_sprite = CCSprite::createWithSpriteFrameName("back.png");
@@ -130,13 +132,13 @@ bool ECSettingsScene::init() {
 																 NULL,
 																 this,
 																 menu_selector(ECSettingsScene::GoMainMenu));
-		back_button->setPosition(ccp(back_button->getContentSize().width * 0.7f, back_button->getContentSize().height * 0.7f));
+		back_button->setPosition(ccp(back_button->getContentSize().width * 0.7f, back_button->getContentSize().height * 1.2f));
 		CCMenu* menu = CCMenu::create(back_button, music_button, about_button, sound_button, trashcan_button,NULL);
 		menu->setPosition(ccp(0,0));
 		this->addChild(menu);
 
 		// audio manager
-		audio_manager_ = ECAudioManager::CreateAudioManagerForScene(SETTINGS_SCENE_AUDIO);
+		//audio_manager_ = ECAudioManager::CreateAudioManagerForScene(SETTINGS_SCENE_AUDIO);
 
 		is_success = true;   
 
@@ -145,7 +147,7 @@ bool ECSettingsScene::init() {
 }
 void ECSettingsScene::GoMainMenu(CCObject* sender) {
 	// audio
-	audio_manager_->PlayButtonClickSound();
+	ECAudioManager::PlayButtonClickSound(SETTINGS_SCENE_AUDIO);
 	ECSceneManager::GoMainMenuSceneWithoutLoadingScene();	
 }
 void ECSettingsScene::OnMASSettingsChanged(CCObject* sender) {
@@ -156,11 +158,11 @@ void ECSettingsScene::OnMASSettingsChanged(CCObject* sender) {
 	case T_MUSIC:
 		{
 			// audio
-			audio_manager_->PlayButtonClickSound();
+			ECAudioManager::PlayButtonClickSound(SETTINGS_SCENE_AUDIO);
 			if (toggle_button->getSelectedIndex() == 0) {
-				audio_manager_->MusicSetting(false);
+				ECAudioManager::MusicSetting(false, SETTINGS_SCENE_AUDIO);
 			} else {
-				audio_manager_->MusicSetting(true);
+				ECAudioManager::MusicSetting(true, SETTINGS_SCENE_AUDIO);
 			}
 		}
 		break;
@@ -170,11 +172,11 @@ void ECSettingsScene::OnMASSettingsChanged(CCObject* sender) {
 	case T_SOUND:
 		{
 			// audio
-			audio_manager_->PlayButtonClickSound();
+			ECAudioManager::PlayButtonClickSound(SETTINGS_SCENE_AUDIO);
 			if (toggle_button->getSelectedIndex() == 0) {
-				audio_manager_->SoundSetting(false);
+				ECAudioManager::SoundSetting(false);
 			} else {
-				audio_manager_->SoundSetting(true);
+				ECAudioManager::SoundSetting(true);
 			}
 		}
 		break;
@@ -185,7 +187,7 @@ void ECSettingsScene::OnAboutClicked() {
 	//CCLOG("Y_POS: %.1f", about_board_->getPosition().y);
 
 	// audio
-	audio_manager_->PlayButtonClickSound();
+	ECAudioManager::PlayButtonClickSound(SETTINGS_SCENE_AUDIO);
 
 	CCMoveTo* move_animaton = NULL;
 	CCPoint current_position = about_board_->getPosition();
@@ -201,7 +203,7 @@ void ECSettingsScene::OnAboutClicked() {
 void ECSettingsScene::OnTrashcanClicked(CCObject* sender) {
 
 	// audio
-	audio_manager_->PlayButtonClickSound();
+	ECAudioManager::PlayButtonClickSound(SETTINGS_SCENE_AUDIO);
 
 	ECDataProviderExt* data_provider = new ECDataProviderExt("level_state.xml", "levels");
 	// first level

@@ -39,8 +39,8 @@ ECGameScene::~ECGameScene()
 	CCSpriteFrameCache::sharedSpriteFrameCache()->removeSpriteFramesFromFile("game_layer_spritesheet.plist");
 
 	// audio
-	delete audio_manager_;
-	audio_manager_ = NULL;
+	//delete audio_manager_;
+	//audio_manager_ = NULL;
 }
 CCScene* ECGameScene::SceneWithGameLayerToLevel(std::string& level)
 {
@@ -88,7 +88,10 @@ bool ECGameScene::InitGameLayerToLayer(std::string& level)
 
 		instance_of_gamelayer_ = this;
 
-		screen_size_ = CCDirector::sharedDirector()->getWinSize();
+		CCSize visible_size = CCDirector::sharedDirector()->getVisibleSize();
+		CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
+
+		screen_size_ = CCSize(origin.x + visible_size.width, origin.y + visible_size.height);
 
 		CCTexture2D::PVRImagesHavePremultipliedAlpha(true);
 		// spritesheet
@@ -103,34 +106,34 @@ bool ECGameScene::InitGameLayerToLayer(std::string& level)
 		
 		// ui elements in game - pause, restart
 		// pause
-		CCSprite* gamePauseButtonSprite = CCSprite::createWithSpriteFrameName("pause_button.png");
-		CCSprite* gamePauseButtonSpriteSelected = CCSprite::createWithSpriteFrameName("pause_button_selected.png");
-		CCMenuItemSprite* gamePauseButton = CCMenuItemSprite::create(gamePauseButtonSprite,
-																	 gamePauseButtonSpriteSelected,
+		CCSprite* game_pause_button_sprite = CCSprite::createWithSpriteFrameName("pause_button.png");
+		CCSprite* game_pause_button_sprite_selected = CCSprite::createWithSpriteFrameName("pause_button_selected.png");
+		CCMenuItemSprite* game_pause_button = CCMenuItemSprite::create(game_pause_button_sprite,
+																	game_pause_button_sprite_selected,
 																	 NULL,
 																	 this,
 																	 menu_selector(ECGameScene::PauseGame));
-		gamePauseButton->setPosition(ccp(screen_size_.width - gamePauseButton->getContentSize().width * 0.5f - 2,
-										 screen_size_.height - gamePauseButton->getContentSize().height * 0.5f - 2));
+		game_pause_button->setPosition(ccp(screen_size_.width - game_pause_button->getContentSize().width * 0.5f - 2,
+										 screen_size_.height - game_pause_button->getContentSize().height * 0.5f - 2));
 
 		// restart
-		CCSprite* gameRestartButtonSprite = CCSprite::createWithSpriteFrameName("restart_button.png");
-		CCSprite* gameRestartButtonSpriteSelected = CCSprite::createWithSpriteFrameName("restart_button_selected.png");
-		CCMenuItemSprite* gameRestartButton = CCMenuItemSprite::create(gameRestartButtonSprite,
-																	   gameRestartButtonSpriteSelected,
+		CCSprite* game_restart_button_sprite = CCSprite::createWithSpriteFrameName("restart_button.png");
+		CCSprite* game_restart_button_sprite_selected = CCSprite::createWithSpriteFrameName("restart_button_selected.png");
+		CCMenuItemSprite* game_restart_button = CCMenuItemSprite::create(game_restart_button_sprite,
+																	  game_restart_button_sprite_selected,
 																	   NULL,
 																	   this,
 																	   menu_selector(ECGameScene::RestartGame));
-		gameRestartButton->setPosition(ccp(gamePauseButton->getPosition().x - gameRestartButton->getContentSize().width - 5,
-										   gamePauseButton->getPosition().y));
+		game_restart_button->setPosition(ccp(game_restart_button->getPosition().x - game_restart_button->getContentSize().width - 5,
+											game_restart_button->getPosition().y));
 
-		CCMenu* gameControlMenu = CCMenu::create(gamePauseButton, gameRestartButton, NULL);
-		gameControlMenu->setPosition(0, 0);
-		this->addChild(gameControlMenu, Z_UI_LABELS, T_PAUSE_RESTART_MENU);
+		CCMenu* game_ui_control_menu = CCMenu::create(game_pause_button, game_restart_button, NULL);
+		game_ui_control_menu->setPosition(0, 0);
+		this->addChild(game_ui_control_menu, Z_UI_LABELS, T_PAUSE_RESTART_MENU);
 
 
 		// loading level data
-		game_level_data_ = new ECDataProviderExt("data4.xml", "levels" ,level);
+		game_level_data_ = new ECDataProviderExt("data4.xml", "levels", level);
 		// set up level
 		this->LoadGameDataForLevel(level.c_str());
 		// seting current level
@@ -138,38 +141,37 @@ bool ECGameScene::InitGameLayerToLayer(std::string& level)
 
 		// labels - fonts
 		// current level
-		int currentLevelNumber = GetCurrentLevelNumber();
-		CCString* currentLevelString = CCString::createWithFormat("Level %i", currentLevelNumber);
-		CCLabelBMFont* currentLevelLabel = CCLabelBMFont::create(currentLevelString->getCString(), "general_font.fnt");
-		currentLevelLabel->setPosition(ccp(screen_size_.width - currentLevelLabel->getContentSize().width * 0.6f ,
-										   currentLevelLabel->getContentSize().height * 0.5f));
-		this->addChild(currentLevelLabel);
+		int current_level_number = GetCurrentLevelNumber();
+		CCString* current_level_string = CCString::createWithFormat("Level %i", current_level_number);
+		CCLabelBMFont* current_level_Label = CCLabelBMFont::create(current_level_string->getCString(), "general_font.fnt");
+		current_level_Label->setPosition(ccp(screen_size_.width - current_level_Label->getContentSize().width * 0.6f ,
+										current_level_Label->getContentSize().height * 0.5f));
+		this->addChild(current_level_Label);
 
 		// timer label
-		CCLabelBMFont* levelTimeLabel = CCLabelBMFont::create("Time: 0", "general_font.fnt");
-		levelTimeLabel->setAnchorPoint(ccp(0.0f, 0.5f));
-		levelTimeLabel->setPosition(ccp(levelTimeLabel->getContentSize().width * 0.05f,
-										screen_size_.height - levelTimeLabel->getContentSize().height * 0.6f));
-		this->addChild(levelTimeLabel, Z_UI_LABELS, T_LEVEL_TIME_LABEL);
+		CCLabelBMFont* level_time_label = CCLabelBMFont::create("Time: 0", "general_font.fnt");
+		level_time_label->setAnchorPoint(ccp(0.0f, 0.5f));
+		level_time_label->setPosition(ccp(level_time_label->getContentSize().width * 0.05f,
+										screen_size_.height - level_time_label->getContentSize().height * 0.6f));
+		this->addChild(level_time_label, Z_UI_LABELS, T_LEVEL_TIME_LABEL);
 
 		// best time label
 		float best_time = ECDataProvider::GetBestTimeForLevel(current_level_);
 		CCString* best_time_string = CCString::createWithFormat("Best time: %.1f", best_time);
-		CCLabelBMFont* levelBestTime = CCLabelBMFont::create(best_time_string->getCString(), "general_font.fnt");
-		levelBestTime->setAnchorPoint(ccp(0.0f, 0.5f));
-		levelBestTime->setPosition(ccpSub(levelTimeLabel->getPosition(), ccp(0, levelBestTime->getContentSize().height)));
-		this->addChild(levelBestTime, Z_UI_LABELS, T_LEVEL_BEST_TIME_LABEL);
+		CCLabelBMFont* level_best_time_label = CCLabelBMFont::create(best_time_string->getCString(), "general_font.fnt");
+		level_best_time_label->setAnchorPoint(ccp(0.0f, 0.5f));
+		level_best_time_label->setPosition(ccpSub(level_time_label->getPosition(), ccp(0, level_best_time_label->getContentSize().height)));
+		this->addChild(level_best_time_label, Z_UI_LABELS, T_LEVEL_BEST_TIME_LABEL);
 
 		// building lights on counter
-		CCLabelBMFont* lightsCounterLabel = CCLabelBMFont::create(CCString::createWithFormat("0 | %i", buildings_.size())->getCString(), "general_font.fnt");
-		lightsCounterLabel->setPosition(ccp(screen_size_.width * 0.5f, levelTimeLabel->getPosition().y));
-		this->addChild(lightsCounterLabel, Z_UI_LABELS, T_LEVEL_LIGHTS_COUNTER);
+		CCLabelBMFont* lights_counter_label = CCLabelBMFont::create(CCString::createWithFormat("0 | %i", buildings_.size())->getCString(), "general_font.fnt");
+		lights_counter_label->setPosition(ccp(screen_size_.width * 0.5f, level_time_label->getPosition().y));
+		this->addChild(lights_counter_label, Z_UI_LABELS, T_LEVEL_LIGHTS_COUNTER);
 
 
 		// audio
-		audio_manager_ = ECAudioManager::CreateAudioManagerForScene(GAME_SCENE_AUDIO);
-		audio_manager_->PlayBackgroundMusic();
-
+		//audio_manager_ = ECAudioManager::CreateAudioManagerForScene(GAME_SCENE_AUDIO);
+		ECAudioManager::PlayBackgroundMusic(GAME_SCENE_AUDIO);
 
 		this->scheduleUpdate();
 
@@ -400,7 +402,7 @@ void ECGameScene::PauseGame(CCObject* pSender) {
 	CCLOG("PAUSE BUTTON");
 
 	// click
-	audio_manager_->PlayButtonClickSound();
+	ECAudioManager::PlayButtonClickSound(GAME_SCENE_AUDIO);
 
 	// pause the loop | update method.
 	this->PauseGameLoop(true);
@@ -470,12 +472,12 @@ void ECGameScene::PauseGame(CCObject* pSender) {
 	this->addChild(afterPauseOptionMenu, Z_PAUSE_MENU, T_AFTER_PAUSE_MENU);
 
 	// move up stick
-	CCMoveBy* moveStickUp = CCMoveBy::create(0.2f, ccp(0, stick->getContentSize().height * 0.9f));
-	stick->runAction(moveStickUp);
+	CCMoveBy* move_stick_up = CCMoveBy::create(0.2f, ccp(0, stick->getContentSize().height));
+	stick->runAction(move_stick_up);
 
 	// move up menu items | buttons
-	CCMoveBy* moveMenuUp = CCMoveBy::create(0.2f, ccp(0, stick->getContentSize().height * 0.9f));
-	afterPauseOptionMenu->runAction(moveMenuUp);
+	CCMoveBy* move_menu_up = CCMoveBy::create(0.2f, ccp(0, stick->getContentSize().height));
+	afterPauseOptionMenu->runAction(move_menu_up);
 
 	// move restart - pause buttons up
 	this->MoveUIElementsInDirection(A_MOVE_UP);
@@ -498,11 +500,12 @@ void ECGameScene::PauseGameLoop(bool is_paused) {
 	}
 }
 void ECGameScene::RestartGame(CCObject* pSender) {
-	audio_manager_->PlayButtonClickSound();
+	ECAudioManager::PlayButtonClickSound(GAME_SCENE_AUDIO);
 	// just restart scene with a current level
 	ECSceneManager::GoGameSceneWithLevel(current_level_);
 }
 void ECGameScene::NextLevel(CCObject* pSender) {
+	ECAudioManager::PlayButtonClickSound(GAME_SCENE_AUDIO);
 
 	int nextLevelNumber = GetNextLevelNumber();
 	CCString* nextLevel = CCString::createWithFormat("level%i",nextLevelNumber);
@@ -510,6 +513,7 @@ void ECGameScene::NextLevel(CCObject* pSender) {
 	ECSceneManager::GoGameSceneWithLevel(nextLevelString);
 }
 void ECGameScene::LevelSelectLayer(CCObject* pSender) {
+	ECAudioManager::PlayButtonClickSound(GAME_SCENE_AUDIO);
 	ECSceneManager::GoLevelSelectScene();
 }
 void ECGameScene::PauseMenuItemClicked(CCObject* pSender) {
@@ -519,15 +523,15 @@ void ECGameScene::PauseMenuItemClicked(CCObject* pSender) {
 	case T_CONTINUE:
 		{
 			//shaded transparent background
-			CCLayerColor* pauseShadeTransparentBackgroundLayer = (CCLayerColor*)this->getChildByTag(T_SHADE_PAUSE_BACKGROUND_LAYER);
-			this->removeChild(pauseShadeTransparentBackgroundLayer, true);
+			CCLayerColor* pause_shade_transparent_background_layer = (CCLayerColor*)this->getChildByTag(T_SHADE_PAUSE_BACKGROUND_LAYER);
+			this->removeChild(pause_shade_transparent_background_layer, true);
 
 			// stick
 			CCSprite* stick = (CCSprite*)this->getChildByTag(T_STICK);
-			CCMoveBy* moveStickDown = CCMoveBy::create(0.3f, ccp(0, -stick->getContentSize().height));
-			CCCallFuncND* removeFunctionForStick = CCCallFuncND::create(this, callfuncND_selector(ECGameScene::RemoveObjectFromParent), (void*)true);
-			CCSequence* stickSequence = CCSequence::create(moveStickDown, removeFunctionForStick, NULL);
-			stick->runAction(stickSequence);
+			CCMoveBy* move_stick_down = CCMoveBy::create(0.3f, ccp(0, -stick->getContentSize().height));
+			CCCallFuncND* remove_function_for_stick = CCCallFuncND::create(this, callfuncND_selector(ECGameScene::RemoveObjectFromParent), (void*)true);
+			CCSequence* stick_sequence = CCSequence::create(move_stick_down, remove_function_for_stick, NULL);
+			stick->runAction(stick_sequence);
 
 			// menu
 			CCMenu* afterPauseMenu = (CCMenu*)this->getChildByTag(T_AFTER_PAUSE_MENU);
@@ -559,12 +563,12 @@ void ECGameScene::PauseMenuItemClicked(CCObject* pSender) {
 	}
 
 	// sound
-	audio_manager_->PlayButtonClickSound();
+	ECAudioManager::PlayButtonClickSound(GAME_SCENE_AUDIO);
 }
 void ECGameScene::WinGame() {
 
 	// audio
-	audio_manager_->PlayActionWinSound();
+	ECAudioManager::PlayActionWinSound();
 
 	// pause game loop
 	//this->pauseGameLoop(true);
@@ -769,7 +773,7 @@ int ECGameScene::GetNumberOfStarstFromPercentage(int percentage) {
 }
 void ECGameScene::AddStarsOnWinBoard(const int star_number) {
 	// audio
-	audio_manager_->PlayActionCompletedSound();
+	ECAudioManager::PlayActionCompletedSound();
 	
 	// win info board sprite node
 	CCNode* win_info_board = this->getChildByTag(T_WIN_INFO_BOARD);
@@ -790,7 +794,7 @@ void ECGameScene::AddStarsOnWinBoard(const int star_number) {
 }
 void ECGameScene::PlayCompletedSoundEffect() {
 	// audio
-	audio_manager_->PlayActionCompletedSound();
+	ECAudioManager::PlayActionCompletedSound();
 }
 int ECGameScene::GetCurrentLevelNumber() const {
 	// extracted int value from a String object representing current level (i.e. "level13" -> returns 13)
@@ -808,20 +812,20 @@ int ECGameScene::GetNextLevelNumber() const {
 }
 void ECGameScene::MoveUIElementsInDirection(UIElementsMoveDirection direction) {
 	// pause_restart_menu
-	CCMenu* pauseRestartMenu = (CCMenu*)this->getChildByTag(T_PAUSE_RESTART_MENU);
-	CCMoveTo* movePauseRestartMenu = NULL;
+	CCMenu* pause_restart_menu = (CCMenu*)this->getChildByTag(T_PAUSE_RESTART_MENU);
+	CCMoveTo* move_pause_restart_menu = NULL;
 
 	switch (direction)
 	{
 	case A_MOVE_DOWN:
-		movePauseRestartMenu = CCMoveTo::create(0.5f, ccpSub(pauseRestartMenu->getPosition(), ccp(0,pauseRestartMenu->getContentSize().height/2)));
+		move_pause_restart_menu = CCMoveTo::create(0.5f, ccpSub(pause_restart_menu->getPosition(), ccp(0,pause_restart_menu->getContentSize().height/2)));
 		break;
 	case A_MOVE_UP:
-		movePauseRestartMenu = CCMoveTo::create(0.5f, ccpAdd(pauseRestartMenu->getPosition(), ccp(0, pauseRestartMenu->getContentSize().height * 0.5f)));
+		move_pause_restart_menu = CCMoveTo::create(0.5f, ccpAdd(pause_restart_menu->getPosition(), ccp(0, pause_restart_menu->getContentSize().height * 0.5f)));
 		break;
 	}
 	// run action
-	pauseRestartMenu->runAction(movePauseRestartMenu);
+	pause_restart_menu->runAction(move_pause_restart_menu);
 }
 void ECGameScene::SetTowersTouchMode(bool isTouchEnabled) {
 	// remove touch delegate in tower

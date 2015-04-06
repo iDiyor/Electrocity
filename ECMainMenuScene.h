@@ -36,7 +36,7 @@ private:
 	void onButtonClicked(CCObject* sender);
 
 	CCSize screen_size_;
-	ECAudioManager* audio_manager_;
+	//ECAudioManager* audio_manager_;
 };
 
 

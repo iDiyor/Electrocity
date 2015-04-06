@@ -207,6 +207,6 @@ private:
 	CCLabelBMFont* temp_label_;  /*! < a temporary label that used in LabelUpdateTimer method to create timer like effect (animation only)
 								 on score and best_score labels */
 	int on_light_building_counter_;
-	ECAudioManager* audio_manager_;
+	//ECAudioManager* audio_manager_;
 };	
 #endif// __EC_GAME_SCENE_H__
