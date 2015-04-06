@@ -25,19 +25,19 @@ public:
   ECAudioManager();
   ~ECAudioManager();
 
-  void PlayBackgroundMusic();
-  void StopBackgroundMusic();
-  void PlayButtonClickSound();
-  void PlayActionWinSound();
-  void PlayActionCompletedSound();
+  static void PlayBackgroundMusic();
+  static void PlayBackgroundMusic(SCENE in_scene);
+  static void StopBackgroundMusic();
+  static void PlayButtonClickSound(SCENE in_scene);
+  static void PlayActionWinSound();
+  static void PlayActionCompletedSound();
 
-  void MusicSetting(bool is_enabled);
-  void SoundSetting(bool is_enabled);
+  static void MusicSetting(bool is_enabled, SCENE in_scene);
+  static void SoundSetting(bool is_enabled);
 
-  SCENE scene_;
-  SimpleAudioEngine* audio_manager_;
-  bool is_music_on_;
-  bool is_sound_on_;
+private:
+  //bool is_music_on_;
+  //bool is_sound_on_;
 
 };
 

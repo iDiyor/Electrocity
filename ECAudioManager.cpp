@@ -3,6 +3,14 @@
 #include "ECAudioManager.h"
 #include "ECDataProvider.h"
 
+const char* MAIN_MENU_BACKGROUND_MUSIC  = "audio/music_main_menu.mp3";
+const char* GAME_BACKGROUND_MUSIC 	    = "audio/music_game_scene.mp3";
+const char* CLICK_PLAY 				    = "audio/click_play.wav";
+const char* CLICK_SELECT 				= "audio/click_select.wav";
+const char* ACTION_COMPLETED 			= "audio/action_completed.wav";
+const char* ACTION_WIN 					= "audio/action_win.wav";
+
+
 ECAudioManager::ECAudioManager() {
 
 }
@@ -26,113 +34,82 @@ bool ECAudioManager::init(SCENE scene) {
   bool is_success = false;
   do {
 		
-	  audio_manager_ = SimpleAudioEngine::sharedEngine();
-
-	  is_music_on_ = ECDataProvider::GetSettingsParameter(MUSIC_SETTING);
-	  is_sound_on_ = ECDataProvider::GetSettingsParameter(SOUND_SETTING);
-
-	  switch (scene)
-	  {
-	  case MAIN_MENU_SCENE_AUDIO:
-		  {
-			  audio_manager_->preloadBackgroundMusic("audio/music_main_menu.mp3");
-			  audio_manager_->preloadEffect("audio/click_play.wav"); //play button click
-															  //sound applies to all : option, leaderboards
-		  }
-		  break;
-	  case SETTINGS_SCENE_AUDIO:	// settings audio management is temporary solution until best approach is found (singleton)
-		  //audio_manager_->preloadBackgroundMusic("audio/music_main_menu.mp3"); 
-		  break;
-	  case LEVEL_SELECT_SCENE_AUDIO:
-		  break;
-	  case GAME_SCENE_AUDIO:
-		  {
-			  // I have no idea whether I need to unload this or not
-			  audio_manager_->unloadEffect("audio/click_play.wav");
-
-			  audio_manager_->preloadBackgroundMusic("audio/music_game_scene.mp3");
-			  audio_manager_->preloadEffect("audio/click_select.wav");
-			  audio_manager_->preloadEffect("audio/action_completed.wav");
-			  audio_manager_->preloadEffect("audio/action_win.wav");
-		  }
-		  break;
-	  }
-
-	  scene_ = scene;
-
     is_success = true;
   }while(0);
   return is_success;
 }
 void ECAudioManager::PlayBackgroundMusic() {
-	if (!is_music_on_)
+	if (!ECDataProvider::GetSettingsParameter(MUSIC_SETTING))
 		return;
+	PlayBackgroundMusic(MAIN_MENU_SCENE_AUDIO);
+}
+void ECAudioManager::PlayBackgroundMusic(SCENE in_scene) {
+	if (!ECDataProvider::GetSettingsParameter(MUSIC_SETTING))
+			return;
 
-	CCLOG("PLAY");
-	switch (scene_)
+	switch (in_scene)
 	{
 		case MAIN_MENU_SCENE_AUDIO:
-			audio_manager_->playBackgroundMusic("audio/music_main_menu.mp3", true);
+			SimpleAudioEngine::sharedEngine()->playBackgroundMusic(MAIN_MENU_BACKGROUND_MUSIC, true);
 		break;
 		case SETTINGS_SCENE_AUDIO:
-			audio_manager_->playBackgroundMusic("audio/music_main_menu.mp3", true);
+			SimpleAudioEngine::sharedEngine()->playBackgroundMusic(MAIN_MENU_BACKGROUND_MUSIC, true);
 		break;
 		case LEVEL_SELECT_SCENE_AUDIO:
 		break;
 		case GAME_SCENE_AUDIO:
-			audio_manager_->playBackgroundMusic("audio/music_game_scene.mp3", true);
+			SimpleAudioEngine::sharedEngine()->playBackgroundMusic(GAME_BACKGROUND_MUSIC, true);
 		break;
 	}
 }
 void ECAudioManager::StopBackgroundMusic() {
-	if (audio_manager_->isBackgroundMusicPlaying()) 
-		audio_manager_->stopBackgroundMusic();
+	if (SimpleAudioEngine::sharedEngine()->isBackgroundMusicPlaying())
+		SimpleAudioEngine::sharedEngine()->stopBackgroundMusic();
 }
-void ECAudioManager::PlayButtonClickSound() {
-	if (!is_sound_on_) 
+void ECAudioManager::PlayButtonClickSound(SCENE in_scene) {
+	if (!ECDataProvider::GetSettingsParameter(SOUND_SETTING))
 		return;
 
-	switch (scene_)
+	switch (in_scene)
 	{
 	case MAIN_MENU_SCENE_AUDIO:
-		audio_manager_->playEffect("audio/click_play.wav");
+		SimpleAudioEngine::sharedEngine()->playEffect(CLICK_PLAY);
 		break;
 	case SETTINGS_SCENE_AUDIO:
-		audio_manager_->playEffect("audio/click_select.wav");
+		SimpleAudioEngine::sharedEngine()->playEffect(CLICK_SELECT);
 	break;
 	case LEVEL_SELECT_SCENE_AUDIO:
-		audio_manager_->playEffect("audio/click_select.wav");
+		SimpleAudioEngine::sharedEngine()->playEffect(CLICK_PLAY);
 	break;
 	case GAME_SCENE_AUDIO:
-		audio_manager_->playEffect("audio/click_select.wav");
+		SimpleAudioEngine::sharedEngine()->playEffect(CLICK_SELECT);
 		break;
 	}
 }
 void ECAudioManager::PlayActionWinSound() {
-	if (is_sound_on_)
-		audio_manager_->playEffect("audio/action_win.wav");
+	if (ECDataProvider::GetSettingsParameter(SOUND_SETTING))
+		SimpleAudioEngine::sharedEngine()->playEffect(ACTION_WIN);
 }
 void ECAudioManager::PlayActionCompletedSound() {
-	if (is_sound_on_)
-		audio_manager_->playEffect("audio/action_completed.wav");
+	if (ECDataProvider::GetSettingsParameter(SOUND_SETTING))
+		SimpleAudioEngine::sharedEngine()->playEffect(ACTION_COMPLETED);
 }
-void ECAudioManager::MusicSetting(bool is_enabled) {
+void ECAudioManager::MusicSetting(bool is_enabled, SCENE in_scene) {
 	// for an instant change
-	is_music_on_ = is_enabled;
+	//is_music_on_ = is_enabled;
 
-	if (!is_enabled) { // there is always bg music playing. Need to stop it when a user disables the music
-		CCLOG("STOP");
-		this->StopBackgroundMusic();
-	} else {
-		CCLOG("RESUME");
-		this->PlayBackgroundMusic();
-	}
-
-	
 	// xml
 	ECDataProvider::SetSettingsParameter(MUSIC_SETTING, is_enabled);
+
+	if (!is_enabled) { // there is always bg music playing. Need to stop it when a user disables the music
+		//CCLOG("STOP");
+		StopBackgroundMusic();
+	} else {
+		//CCLOG("RESUME");
+		PlayBackgroundMusic(in_scene);
+	}
 }
 void ECAudioManager::SoundSetting(bool is_enabled) {
-	is_sound_on_ = is_enabled;
+	//is_sound_on_ = is_enabled;
 	ECDataProvider::SetSettingsParameter(SOUND_SETTING, is_enabled);
 }
