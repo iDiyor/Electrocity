@@ -15,8 +15,8 @@ ECLevelSelectLayer::ECLevelSelectLayer() {
 ECLevelSelectLayer::~ECLevelSelectLayer() {
 	CCSpriteFrameCache::sharedSpriteFrameCache()->removeSpriteFramesFromFile("level_select_layer_spritesheet.plist");
 
-	delete audio_manager_;
-	audio_manager_ = NULL;
+	//delete audio_manager_;
+	//audio_manager_ = NULL;
 }
 
 CCScene* ECLevelSelectLayer::scene()
@@ -42,13 +42,10 @@ bool ECLevelSelectLayer::init()
 	{
 		CC_BREAK_IF(!CCLayer::init());
 
-		screen_size_ = CCDirector::sharedDirector()->getWinSize();
-		
-		CCRect win_rect;
-		win_rect.origin = CCDirector::sharedDirector()->getVisibleOrigin();
-		CCPoint win_point = CCDirector::sharedDirector()->getVisibleOrigin();
+		CCSize visible_size = CCDirector::sharedDirector()->getVisibleSize();
+		CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
 
-		float winBottomY = win_rect.origin.y;
+		screen_size_ = CCSize(origin.x + visible_size.width, origin.y + visible_size.height);
 
 		CCSpriteFrameCache::sharedSpriteFrameCache()->addSpriteFramesWithFile("level_select_layer_spritesheet.plist");
 		CCSpriteBatchNode* level_select_layer_spritesheet = CCSpriteBatchNode::create("level_select_layer_spritesheet.pvr.ccz");
@@ -82,10 +79,10 @@ bool ECLevelSelectLayer::init()
 		level_chapters_array->addObject(chapter_page_four);
 
 		ECScrollLayer* scroller = ECScrollLayer::createWithLayersWithOffset(level_chapters_array, 1);
-		scroller->_pagesIndicatorNormalColor = ccc4(14,134,93,255);
-		scroller->_pagesIndicatorSelectedColor = ccc4(227,164,45,255);
-		scroller->_pagesIndicatorPosition = ccp(screen_size_.width * 0.5f, winBottomY+5);
-		scroller->_marginOffSet = 60.0f;
+		scroller->_pages_indicator_normal_color = ccc4(14,134,93,255);
+		scroller->_pages_indicator_selected_color = ccc4(227,164,45,255);
+		scroller->_pages_indicator_position = ccp(screen_size_.width * 0.5f, origin.y + 5);
+		scroller->_margin_off_set = 60.0f;
 		scroller->selectPage(0);
 		this->addChild(scroller);
 
@@ -94,7 +91,7 @@ bool ECLevelSelectLayer::init()
 		CCString* total_score_string = CCString::createWithFormat("Score: %i", ECDataProvider::GetGeneralScore());
 		CCLabelBMFont* total_score_label = CCLabelBMFont::create(total_score_string->getCString(), "general_font.fnt");
 		total_score_label->setPosition(ccp(screen_size_.width - total_score_label->getContentSize().width * 0.6f, 
-										   total_score_label->getContentSize().height * 0.6f));
+										   total_score_label->getContentSize().height * 1.2f));
 		this->addChild(total_score_label);
 
 		// main menu back button
@@ -105,13 +102,13 @@ bool ECLevelSelectLayer::init()
 																 NULL,
 																 this,
 																 menu_selector(ECLevelSelectLayer::GoMainMenu));
-		back_button->setPosition(ccp(back_button->getContentSize().width * 0.7f, back_button->getContentSize().height * 0.7f));
+		back_button->setPosition(ccp(back_button->getContentSize().width * 0.7f, back_button->getContentSize().height * 1.2f));
 		CCMenu* menu = CCMenu::create(back_button, NULL);
 		menu->setPosition(ccp(0,0));
 		this->addChild(menu);
 
 		//audio
-		audio_manager_ = ECAudioManager::CreateAudioManagerForScene(LEVEL_SELECT_SCENE_AUDIO);
+		//audio_manager_ = ECAudioManager::CreateAudioManagerForScene(LEVEL_SELECT_SCENE_AUDIO);
 
 		is_success = true;
 	}while(0);
@@ -132,6 +129,6 @@ void ECLevelSelectLayer::scrollViewDidZoom(CCScrollView* view)
 }
 void ECLevelSelectLayer::GoMainMenu(CCObject* sender) {
 	// audio
-	audio_manager_->PlayButtonClickSound();
+	ECAudioManager::PlayButtonClickSound(LEVEL_SELECT_SCENE_AUDIO);
 	ECSceneManager::GoMainMenuScene();
 }

@@ -2,6 +2,7 @@
 //	diyor.islomov@gmail.com || @iDiyor 
 #include "ECLevelChapterLayer.h"
 #include "ECSceneManager.h"
+#include "ECAudioManager.h"
 
 #define NUMBER_OF_LEVELS_ON_EACH_CHAPTER 15
 
@@ -33,8 +34,10 @@ bool ECLevelChapterLayer::InitWithBackgroundImage(const char* background_img_fil
 	do
 	{
 		CC_BREAK_IF(!CCLayer::init());
+		CCSize visible_size = CCDirector::sharedDirector()->getVisibleSize();
+		CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
 
-		screen_size_ = CCDirector::sharedDirector()->getWinSize();
+		screen_size_ = CCSize(origin.x + visible_size.width, origin.y + visible_size.height);
 
 		CCSprite* background = CCSprite::createWithSpriteFrameName(background_img_filename);
 
@@ -164,6 +167,8 @@ void ECLevelChapterLayer::CreateLevelSelectButtons(int row,											// rows
 }
 void ECLevelChapterLayer::SelectLevel(CCObject* sender)
 {
+	ECAudioManager::PlayButtonClickSound(LEVEL_SELECT_SCENE_AUDIO);
+
 	if (CCMenuItemSprite* button = dynamic_cast<CCMenuItemSprite*>(sender)) {
 		CCLOG("level%i", button->getTag());
 		CCString* selected_level = CCString::createWithFormat("level%i", button->getTag());
