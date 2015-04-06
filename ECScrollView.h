@@ -34,27 +34,27 @@ public:
 	
 	ECScrollViewDelegate* _delegate;
 
-	int _currentScreen;
-	int _prevScreen;
-	float _startSwipe;
-	float _minimumTouchLengthToSlide;
-	float _minimumTouchLenghtToChangePage;
+	int _current_screen;
+	int _prev_screen;
+	float _start_swipe;
+	float _minimum_touch_length_to_slide;
+	float _minimum_touch_lenght_to_change_page;
 
-	bool _showPageIndicator;
+	bool _show_page_indicator;
 	
-	CCPoint _pagesIndicatorPosition;
-	ccColor4B _pagesIndicatorSelectedColor;
-	ccColor4B _pagesIndicatorNormalColor;
+	CCPoint _pages_indicator_position;
+	ccColor4B _pages_indicator_selected_color;
+	ccColor4B _pages_indicator_normal_color;
 
 	int _state;
-	bool _stealTouches;
+	bool _steal_touches;
 
-	CCTouch* _scrollTouch;
+	CCTouch* _scroll_touch;
 	
 	CCArray* _layers;
 
-	float _pagesWidthOffset;
-	float _marginOffSet;
+	float _pages_width_offset;
+	float _margin_off_set;
 
 	//
 	int getTotalScreens();
