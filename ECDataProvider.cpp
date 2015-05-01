@@ -1,6 +1,7 @@
 //  Copyright (c) 2015 Diyor Islomov. All rights reserved.
 //	diyor.islomov@gmail.com || @iDiyor 
 #include "ECDataProvider.h"
+#include "ECDataProviderExt.h"
 
 #define BEST_TIME_KEY "BEST_TIME"
 #define BEST_SCORE_KEY "BEST_SCORE"
@@ -8,8 +9,9 @@
 #define MUSIC_KEY "MUSIC_SETTING"
 #define SOUND_KEY "SOUND_SETTING"
 #define LAUNCH_COUNTER_KEY "LUANCH_COUNT"
+#define LEVEL_PLAYED_KEY "_PLAYED" // level_name + _PLAYED = level1_PLAYED
 
-void ECDataProvider::SetBestTimeForLevel(const float time, const std::string& level) {
+void ECDataProvider::SetBestTimeForLevel(const std::string level, const float time) {
 	std::string key_string = level + "_" + BEST_TIME_KEY;	// level1_BEST_TIME
 	if ((GetBestTimeForLevel(level) == 0.0f) || 
 		(time < GetBestTimeForLevel(level))) {						/*! < call GetBestTimeForLevel("arg") with passed "level" parameter 
@@ -17,25 +19,30 @@ void ECDataProvider::SetBestTimeForLevel(const float time, const std::string& le
 		CCUserDefault::sharedUserDefault()->setFloatForKey(key_string.c_str(), time);	
 	}
 }
-void ECDataProvider::SetBestScoreForLevel(const int score, const std::string& level) {
+void ECDataProvider::SetBestScoreForLevel(const std::string level, const int score) {
 	std::string key_string = level + "_" + BEST_SCORE_KEY;	// level1_BEST_SCORE
 	if ((GetBestScoreForLevel(level) == 0) ||
 		(score > GetBestScoreForLevel(level))) {
 			CCUserDefault::sharedUserDefault()->setIntegerForKey(key_string.c_str(), score);
 	}
 }
-void ECDataProvider::SetGeneralScore(const int score) {
+void ECDataProvider::SetGeneralScore(const std::string level, const int score) {
 	
 	// request to delete score
 	if (score == 0)
 		CCUserDefault::sharedUserDefault()->setIntegerForKey(GENERAL_SCORE_KEY, score);
 	
-	if ((GetGeneralScore() == 0) ||
-		(GetGeneralScore() > 0)) {
-			int old_score = GetGeneralScore();
-			int new_score = old_score + score;
-			CCUserDefault::sharedUserDefault()->setIntegerForKey(GENERAL_SCORE_KEY, new_score);
+	if (!GetLevelPLayed(level) || GetBestScoreForLevel(level) < score) {
+		if ((GetGeneralScore() == 0) || (GetGeneralScore() > 0)) {
+					int old_score = GetGeneralScore();
+					int new_score = old_score + score;
+					CCUserDefault::sharedUserDefault()->setIntegerForKey(GENERAL_SCORE_KEY, new_score);
+			}
 	}
+}
+void ECDataProvider::SetLevelPLayed(std::string level, bool is_played) {
+	std::string level_key = level + LEVEL_PLAYED_KEY;
+	CCUserDefault::sharedUserDefault()->setBoolForKey(level_key.c_str(), is_played);
 }
 void ECDataProvider::SetSettingsParameter(SettingsParameter parameter, bool is_enabled) {
 	switch (parameter)
@@ -51,16 +58,20 @@ void ECDataProvider::SetSettingsParameter(SettingsParameter parameter, bool is_e
 void ECDataProvider::SetGameLaunchCounter(const int number) {
 	CCUserDefault::sharedUserDefault()->setIntegerForKey(LAUNCH_COUNTER_KEY, number);
 }
-float ECDataProvider::GetBestTimeForLevel(const std::string& level) {
+float ECDataProvider::GetBestTimeForLevel(const std::string level) {
 	std::string key_string = level + "_" + BEST_TIME_KEY; // string builder
 	return CCUserDefault::sharedUserDefault()->getFloatForKey(key_string.c_str());
 }
-int ECDataProvider::GetBestScoreForLevel(const std::string& level) {
+int ECDataProvider::GetBestScoreForLevel(const std::string level) {
 	std::string key_string = level + "_" + BEST_SCORE_KEY;
 	return CCUserDefault::sharedUserDefault()->getIntegerForKey(key_string.c_str());
 }
 int ECDataProvider::GetGeneralScore() {
 	return CCUserDefault::sharedUserDefault()->getIntegerForKey(GENERAL_SCORE_KEY);
+}
+bool ECDataProvider::GetLevelPLayed(const std::string level) {
+	std::string level_key = level + LEVEL_PLAYED_KEY;
+	return CCUserDefault::sharedUserDefault()->getBoolForKey(level_key.c_str(), false);
 }
 bool ECDataProvider::GetSettingsParameter(SettingsParameter parameter) {
 	bool result = false;

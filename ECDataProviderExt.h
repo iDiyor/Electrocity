@@ -40,7 +40,6 @@ public:
 	void LoadPositionXYOfTowers(std::vector<CCPoint>& dest_vector);
 	void LoadNodeAttributesForNodeType(NodeType node_type, int* image_file_number, int* quantity, float* scale);
 	bool LoadLinesLoopAttribute();
-
 	/**********************************
 	* Methods related to level select scene
 	* map<level number, number of stars>
