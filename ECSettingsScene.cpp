@@ -6,6 +6,11 @@
 #include "ECDataProviderExt.h"
 #include "ECAudioManager.h"
 
+#include "pthread.h"
+
+#define MAX_NUMBER_OF_LEVELS_IN_GAME 60
+
+
 ECSettingsScene::ECSettingsScene(){
 
 }
@@ -198,30 +203,82 @@ void ECSettingsScene::OnAboutClicked() {
 		move_animaton = CCMoveTo::create(0.3f, ccp(current_position.x, screen_size_.height + about_board_->getContentSize().height));
 	} 
 
-	about_board_->runAction(move_animaton);	
+	if (about_board_->numberOfRunningActions() == 0)
+		about_board_->runAction(move_animaton);
 }
 void ECSettingsScene::OnTrashcanClicked(CCObject* sender) {
 
 	// audio
 	ECAudioManager::PlayButtonClickSound(SETTINGS_SCENE_AUDIO);
-
+	
+	/*pthread_t thread_1;
+	pthread_create(&thread_1, NULL, &ECSettingsScene::CallFromThread, NULL);
+	pthread_join(thread_1, NULL);*/
+	ClearData();
+}
+void ECSettingsScene::ClearData() {
 	ECDataProviderExt* data_provider = new ECDataProviderExt("level_state.xml", "levels");
 	// first level
 	data_provider->SetPlayedAndStarsOnLevelButton("level1", false, 0);
 	data_provider->SetBlockForLevel("level1", false);
 
 	// levels : 2 - 60 : blocked and 0 stars
-	for (int i = 2; i <= 60; i++) {
-		CCString* level_name = CCString::createWithFormat("level%i", i);
+	CCString* level_name = NULL;
+	for (int i = 2; i <= MAX_NUMBER_OF_LEVELS_IN_GAME; i++) {
+		level_name = CCString::createWithFormat("level%i", i);
 		data_provider->SetPlayedAndStarsOnLevelButton(level_name->getCString(), false, 0);
 		data_provider->SetBlockForLevel(level_name->getCString(), true);
-		CCLOG("LEVEL: %s", level_name->getCString());
+		//CCLOG("LEVEL: %s", level_name->getCString());
+
 	}
 
-	ECDataProvider::SetGeneralScore(0);
+	std::string level_name_stl_string;
+	for (int i = 1; i <= MAX_NUMBER_OF_LEVELS_IN_GAME; i++) {
+		level_name_stl_string = "level" + std::to_string(i);
+		//CCLOG("LEVEL_PLAYED: %s", level_name_stl_string.c_str());
+		ECDataProvider::SetLevelPLayed(level_name_stl_string, false);
+		ECDataProvider::SetBestScoreForLevel(level_name_stl_string, 0);
+		ECDataProvider::SetBestTimeForLevel(level_name_stl_string, 0.0);
+	}
+
+	ECDataProvider::SetGeneralScore("", 0);
 
 	// saves data in xml
 	data_provider->SaveFile();
 	delete data_provider;
 	data_provider = NULL;
+}
+void* ECSettingsScene::CallFromThread(void*) {
+	ECDataProviderExt* data_provider = new ECDataProviderExt("level_state.xml", "levels");
+	// first level
+	data_provider->SetPlayedAndStarsOnLevelButton("level1", false, 0);
+	data_provider->SetBlockForLevel("level1", false);
+
+	// levels : 2 - 60 : blocked and 0 stars
+	CCString* level_name = NULL;
+	for (int i = 2; i <= MAX_NUMBER_OF_LEVELS_IN_GAME; i++) {
+		level_name = CCString::createWithFormat("level%i", i);
+		data_provider->SetPlayedAndStarsOnLevelButton(level_name->getCString(), false, 0);
+		data_provider->SetBlockForLevel(level_name->getCString(), true);
+		//CCLOG("LEVEL: %s", level_name->getCString());
+
+	}
+
+	std::string level_name_stl_string;
+	for (int i = 1; i <= MAX_NUMBER_OF_LEVELS_IN_GAME; i++) {
+		level_name_stl_string = "level" + std::to_string(i);
+		//CCLOG("LEVEL_PLAYED: %s", level_name_stl_string.c_str());
+		ECDataProvider::SetLevelPLayed(level_name_stl_string, false);
+		ECDataProvider::SetBestScoreForLevel(level_name_stl_string, 0);
+		ECDataProvider::SetBestTimeForLevel(level_name_stl_string, 0.0);
+	}
+
+	ECDataProvider::SetGeneralScore("", 0);
+
+	// saves data in xml
+	data_provider->SaveFile();
+	delete data_provider;
+	data_provider = NULL;
+
+	return NULL;
 }

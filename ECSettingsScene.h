@@ -43,6 +43,8 @@ private:
 	void OnMASSettingsChanged(CCObject* sender);
 	void OnAboutClicked();
 	void OnTrashcanClicked(CCObject* sender);
+	void ClearData();
+	static void* CallFromThread(void*);
 
 	CCSize screen_size_;
 	CCSprite* about_board_;
