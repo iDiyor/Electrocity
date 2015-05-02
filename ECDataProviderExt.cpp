@@ -9,9 +9,9 @@ USING_NS_CC;
  * This constructor load file from sandbox which is read-only (level data only)
  */
 
-ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::string& parent_node, const std::string& child_node)
+ECDataProviderExt::ECDataProviderExt(const char* file_name, const char* parent_node, const char* child_node)
 {
-	std::string fullFilePath = CCFileUtils::sharedFileUtils()->fullPathForFilename(file_name.c_str());
+	std::string fullFilePath = CCFileUtils::sharedFileUtils()->fullPathForFilename(file_name);
 	unsigned char* p_buffer = NULL;
 	unsigned long buffer_size = 0;
 	p_buffer = CCFileUtils::sharedFileUtils()->getFileData(fullFilePath.c_str(), "r+", &buffer_size);
@@ -21,19 +21,19 @@ ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::st
 	xml_parse_result result = doc_file_->load_buffer(p_buffer, buffer_size);
 	
 	if (result) {
-		CCLOG("%s : Loaded successfully: %s", file_name.c_str(), result.description());
+		CCLOG("%s : Loaded successfully: %s", file_name, result.description());
 		// assining loaded level and finding selected level data
-		level_data_ = new xml_node(doc_file_->child(parent_node.c_str()).child(child_node.c_str()));
-		file_name_ = file_name;
+		level_data_ = new xml_node(doc_file_->child(parent_node).child(child_node));
+		file_name_.assign(file_name);
 	} else {
-		CCLOG("%s : Error description: %s" , file_name.c_str() ,result.description());
+		CCLOG("%s : Error description: %s" , file_name ,result.description());
 	}
 }
 /**
  * This constructor loads file from writeable path which has read-write-execute permission to all files inside (level icons data only)
  */
 
-ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::string& parent_node)
+ECDataProviderExt::ECDataProviderExt(const char* file_name, const char* parent_node)
 {
 	std::string full_file_path = GetPathToFile(file_name);
 	unsigned char* p_buffer = NULL;
@@ -45,12 +45,12 @@ ECDataProviderExt::ECDataProviderExt(const std::string& file_name, const std::st
 	xml_parse_result result = doc_file_->load_buffer(p_buffer, buffer_size);
 	
 	if (result) {
-		CCLOG("%s : Loaded successfully: %s", file_name.c_str(), result.description());
+		CCLOG("%s : Loaded successfully: %s", file_name, result.description());
 		// assining loaded level and finding selected level data
-		level_data_ = new xml_node(doc_file_->child(parent_node.c_str()));
-		file_name_ = file_name;
+		level_data_ = new xml_node(doc_file_->child(parent_node));
+		file_name_.assign(file_name);
 	} else {
-		CCLOG("%s : Error description: %s" , file_name.c_str() ,result.description());
+		CCLOG("%s : Error description: %s" , file_name ,result.description());
 	}
 }
 ECDataProviderExt::~ECDataProviderExt()
@@ -62,7 +62,7 @@ ECDataProviderExt::~ECDataProviderExt()
 	doc_file_ = NULL;
 }
 void ECDataProviderExt::SaveFile() {
-	std::string full_file_path = GetPathToFile(file_name_);
+	std::string full_file_path = GetPathToFile(file_name_.c_str());
 	//CCLOG("FILE_PATH: %s", full_file_path.c_str());
 	doc_file_->save_file(full_file_path.c_str());
 }
@@ -139,39 +139,39 @@ void ECDataProviderExt::LoadDataForLevelSelectButtons(std::vector<int>& v_open_b
 	
 	count = 1;
 }
-void ECDataProviderExt::SetPlayedLevel(const std::string& level, bool is_played) {
-	xml_node level_node = level_data_->child(level.c_str());
+void ECDataProviderExt::SetPlayedLevel(const char* level, bool is_played) {
+	xml_node level_node = level_data_->child(level);
 	level_node.attribute("is_played").set_value(is_played);
-
 	//CCLOG("Level: %s" , level.c_str());
 }
-void ECDataProviderExt::SetStarsNumberForLevel(const std::string& level, const int stars_number) {
-	xml_node level_node = level_data_->child(level.c_str());
+void ECDataProviderExt::SetStarsNumberForLevel(const char* level, const int stars_number) {
+	xml_node level_node = level_data_->child(level);
 	level_node.attribute("number_of_stars").set_value(stars_number);
 	//CCLOG("Level: %s |Stars #: %i" , level.c_str(), stars_number);
 }
-void ECDataProviderExt::SetPlayedAndStarsOnLevelButton(const std::string& level, bool is_played, const int stars_number) {
+void ECDataProviderExt::SetPlayedAndStarsOnLevelButton(const char* level, bool is_played, const int stars_number) {
 	this->SetPlayedLevel(level, is_played);
 	this->SetStarsNumberForLevel(level, stars_number);
 }
-void ECDataProviderExt::SetBlockForLevel(const std::string& level, bool is_blocked) {
-	xml_node level_node = level_data_->child(level.c_str());
+void ECDataProviderExt::SetBlockForLevel(const char* level, bool is_blocked) {
+	xml_node level_node = level_data_->child(level);
 	level_node.attribute("is_blocked").set_value(is_blocked);
 }
-std::string ECDataProviderExt::GetPathToFile(std::string filename) {
+std::string ECDataProviderExt::GetPathToFile(const char* file_name) {
 
 	std::string path = "";
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
 	path = CCFileUtils::sharedFileUtils()->getWritablePath();
-	path = path + filename;
+	path = path + file_name;
 #else
-	path = CCFileUtils::sharedFileUtils()->fullPathForFilename(filename.c_str());
+	path = CCFileUtils::sharedFileUtils()->fullPathForFilename(file_name);
 #endif
 	return path;
 }
-void ECDataProviderExt::MoveXMLFileFromAssetsToWritabalePath(std::string filename) {
-	std::string path_to_file = CCFileUtils::sharedFileUtils()->fullPathForFilename(filename.c_str());
-	std::string writable_path_to_move_file = CCFileUtils::sharedFileUtils()->getWritablePath() + filename;
+void ECDataProviderExt::MoveXMLFileFromAssetsToWritabalePath(const char* file_name) {
+	std::string path_to_file = CCFileUtils::sharedFileUtils()->fullPathForFilename(file_name);
+	std::string writable_path_to_move_file = CCFileUtils::sharedFileUtils()->getWritablePath();
+	writable_path_to_move_file.append(file_name);
 	if (CCFileUtils::sharedFileUtils()->isFileExist(writable_path_to_move_file)) {
 		return;
 	} else {
@@ -186,12 +186,11 @@ void ECDataProviderExt::MoveXMLFileFromAssetsToWritabalePath(std::string filenam
 		xml_parse_result result = doc_file.load_buffer(pBuffer, bufferSize);
 
 		if (result) {
-			CCLOG("%s : Loaded successfully: %s", filename.c_str(), result.description());
+			CCLOG("%s : Loaded successfully: %s", file_name, result.description());
 			// assining loaded level and finding selected level data
 			doc_file.save_file(writable_path_to_move_file.c_str());
 		} else {
-			CCLOG("%s : Error description: %s" , filename.c_str() ,result.description());
+			CCLOG("%s : Error description: %s" , file_name ,result.description());
 		}
-
 	}
 }

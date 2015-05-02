@@ -19,10 +19,10 @@ public:
 	/**
 	*	setters - best time(in float) and best score(in int)
 	*/
-	static void SetBestTimeForLevel(const std::string level, const float time);
-	static void SetBestScoreForLevel(const std::string level, const int score);
-	static void SetGeneralScore(const std::string level, const int score);
-	static void SetLevelPLayed(const std::string level, bool is_played);
+	static void SetBestTimeForLevel(const char* level, const float time);
+	static void SetBestScoreForLevel(const char* level, const int score);
+	static void SetGeneralScore(const char* level, const int score);
+	static void SetLevelPLayed(const char* level, bool is_played);
 	/**
 	* Controls state of music and sound. Saves state values in xml file and
 	* when loaded sets buttons parameter based on that.
@@ -38,10 +38,10 @@ public:
 	/**
 	*	getters - best time(float) and best score(int)
 	*/
-	static float GetBestTimeForLevel(const std::string level);
-	static int GetBestScoreForLevel(const std::string level);
+	static float GetBestTimeForLevel(const char* level);
+	static int GetBestScoreForLevel(const char* level);
 	static int GetGeneralScore();
-	static bool GetLevelPLayed(const std::string level);
+	static bool GetLevelPLayed(const char* level);
 	/**
 	* Returns loaded data of music, sound to set their state;
 	*/

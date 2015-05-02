@@ -119,7 +119,7 @@ bool ECMainMenuLayer::init()
 		// audio
 		//audio_manager_ = ECAudioManager::CreateAudioManagerForScene(MAIN_MENU_SCENE_AUDIO);
 		//audio_manager_->PlayBackgroundMusic();
-		ECAudioManager::PlayBackgroundMusic(GAME_SCENE_AUDIO);
+		//ECAudioManager::PlayBackgroundMusic(GAME_SCENE_AUDIO);
 		if (ECDataProvider::GetGameLaunchCounter() == 0) {
 			ECAudioManager::MusicSetting(true, MAIN_MENU_SCENE_AUDIO);
 			ECAudioManager::SoundSetting(true);
