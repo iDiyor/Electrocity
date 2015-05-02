@@ -30,7 +30,12 @@ private:
 	enum {
 		T_MUSIC,
 		T_ABOUT,
-		T_SOUND
+		T_SOUND,
+		T_MAS_MENU, // music, about, sound menu container
+		T_TRANSPARENT_BLACK_LAYER,
+		T_DIALOG,
+		T_DIALOG_YES,
+		T_DIALOG_NO
 	};
 
 	void GoMainMenu(CCObject* sender);
@@ -43,6 +48,7 @@ private:
 	void OnMASSettingsChanged(CCObject* sender);
 	void OnAboutClicked();
 	void OnTrashcanClicked(CCObject* sender);
+	void OnDialogButtonClicked(CCObject* sender);
 	void ClearData();
 	static void* CallFromThread(void*);
 
@@ -50,6 +56,7 @@ private:
 	CCSprite* about_board_;
 
 	ECAudioManager* audio_manager_;
+	CCSpriteBatchNode* settings_spritesheet_;
 };
 
 #endif //_EC_SETTINGS_SCENE_H_

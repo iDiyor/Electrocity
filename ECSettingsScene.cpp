@@ -58,25 +58,25 @@ bool ECSettingsScene::init() {
 
 		CCTexture2D::PVRImagesHavePremultipliedAlpha(true);
 		CCSpriteFrameCache::sharedSpriteFrameCache()->addSpriteFramesWithFile("settings_spritesheet.plist");
-		CCSpriteBatchNode* settings_spritesheet = CCSpriteBatchNode::create("settings_spritesheet.pvr.ccz");
-		this->addChild(settings_spritesheet);
+		settings_spritesheet_ = CCSpriteBatchNode::create("settings_spritesheet.pvr.ccz");
+		this->addChild(settings_spritesheet_);
 
 		// background
 		CCSprite* background_sprite = CCSprite::createWithSpriteFrameName("settings_background.png");
 		background_sprite->setAnchorPoint(ccp(0,0));
-		settings_spritesheet->addChild(background_sprite);
+		settings_spritesheet_->addChild(background_sprite);
 		
 		// about/credits board
 		// moving down from top and going up
 		about_board_ = CCSprite::createWithSpriteFrameName("credits.png");
 		about_board_->setAnchorPoint(ccp(0.5f, 1.0f));
 		about_board_->setPosition(ccp(screen_size_.width * 0.5f, screen_size_.height + about_board_->getContentSize().height));
-		settings_spritesheet->addChild(about_board_);
+		settings_spritesheet_->addChild(about_board_);
 
 		// settings name boards
 		CCSprite* settings_name_board = CCSprite::createWithSpriteFrameName("settings_name.png");
 		settings_name_board->setPosition(ccp(screen_size_.width * 0.547f, screen_size_.height * 0.277f));
-		settings_spritesheet->addChild(settings_name_board);
+		settings_spritesheet_->addChild(settings_name_board);
 
 		// music house
 		CCSprite* music_button_sprite = CCSprite::createWithSpriteFrameName("music.png");
@@ -140,7 +140,7 @@ bool ECSettingsScene::init() {
 		back_button->setPosition(ccp(back_button->getContentSize().width * 0.7f, back_button->getContentSize().height * 1.2f));
 		CCMenu* menu = CCMenu::create(back_button, music_button, about_button, sound_button, trashcan_button,NULL);
 		menu->setPosition(ccp(0,0));
-		this->addChild(menu);
+		this->addChild(menu, 0, T_MAS_MENU);
 
 		// audio manager
 		//audio_manager_ = ECAudioManager::CreateAudioManagerForScene(SETTINGS_SCENE_AUDIO);
@@ -165,9 +165,9 @@ void ECSettingsScene::OnMASSettingsChanged(CCObject* sender) {
 			// audio
 			ECAudioManager::PlayButtonClickSound(SETTINGS_SCENE_AUDIO);
 			if (toggle_button->getSelectedIndex() == 0) {
-				ECAudioManager::MusicSetting(false, SETTINGS_SCENE_AUDIO);
+				ECAudioManager::MusicSetting(false, GAME_SCENE_AUDIO);
 			} else {
-				ECAudioManager::MusicSetting(true, SETTINGS_SCENE_AUDIO);
+				ECAudioManager::MusicSetting(true, GAME_SCENE_AUDIO);
 			}
 		}
 		break;
@@ -214,7 +214,70 @@ void ECSettingsScene::OnTrashcanClicked(CCObject* sender) {
 	/*pthread_t thread_1;
 	pthread_create(&thread_1, NULL, &ECSettingsScene::CallFromThread, NULL);
 	pthread_join(thread_1, NULL);*/
-	ClearData();
+
+	CCMenu* mas_menu = (CCMenu*)this->getChildByTag(T_MAS_MENU);
+	mas_menu->setEnabled(false);
+
+	// black shaded transparent background layer
+	CCLayerColor* dialog_transparent_background_layer = CCLayerColor::create(ccc4(0,0,0,100));
+	dialog_transparent_background_layer->setTag(T_TRANSPARENT_BLACK_LAYER);
+	this->addChild(dialog_transparent_background_layer);
+	
+	CCSprite* data_erase_dialog = CCSprite::createWithSpriteFrameName("data_erase_dialog.png");
+	data_erase_dialog->setPosition(ccp(screen_size_.width * 0.5f, screen_size_.height * 0.5f));
+	dialog_transparent_background_layer->addChild(data_erase_dialog);
+
+	CCSprite* dialog_yes_button = CCSprite::createWithSpriteFrameName("data_erase_dialog_yes_button.png");
+	CCSprite* dialog_no_button = CCSprite::createWithSpriteFrameName("data_erase_dialog_no_button.png");
+
+	CCMenuItemSprite* dialog_yes_button_item = CCMenuItemSprite::create(dialog_yes_button, dialog_yes_button, NULL, this, menu_selector(ECSettingsScene::OnDialogButtonClicked));
+	CCMenuItemSprite* dialog_no_button_item = CCMenuItemSprite::create(dialog_no_button, dialog_no_button, NULL, this, menu_selector(ECSettingsScene::OnDialogButtonClicked));
+	dialog_yes_button_item->setPosition(ccp(data_erase_dialog->getContentSize().width * 0.22f, data_erase_dialog->getContentSize().height * 0.10f * -1));
+	dialog_no_button_item->setPosition(ccp(data_erase_dialog->getContentSize().width * 0.79f, data_erase_dialog->getContentSize().height * 0.10f * -1));
+	dialog_yes_button_item->setTag(T_DIALOG_YES);
+	dialog_no_button_item->setTag(T_DIALOG_NO);
+
+	CCMenu* menu = CCMenu::create(dialog_yes_button_item, dialog_no_button_item, NULL);
+	menu->setPosition(ccp(0,0));
+	data_erase_dialog->addChild(menu);
+
+	data_erase_dialog->setScale(0.1f);
+
+	CCScaleTo* scale_up_2X = CCScaleTo::create(0.2f, 1.5f);
+	CCMoveTo* move_up = CCMoveTo::create(0.2f, ccp(screen_size_.width * 0.5f, screen_size_.height * 0.6f));
+	CCScaleTo* scale_up_1X = CCScaleTo::create(0.2f, 1.0f);
+	CCMoveTo* move_down = CCMoveTo::create(0.2f, ccp(screen_size_.width * 0.5f, screen_size_.height * 0.5f));
+	CCSpawn* spawn_1 = CCSpawn::create(move_up, scale_up_2X, NULL);
+	CCSpawn* spawn_2 = CCSpawn::create(move_down, scale_up_1X, NULL);
+	CCSequence* sequence = CCSequence::create(spawn_1, spawn_2, NULL);
+	data_erase_dialog->runAction(sequence);
+
+	//ClearData();
+}
+void ECSettingsScene::OnDialogButtonClicked(CCObject* sender) {
+	
+	// audio
+	ECAudioManager::PlayButtonClickSound(SETTINGS_SCENE_AUDIO);
+
+	CCMenuItem* item = (CCMenuItem*)sender;
+	switch (item->getTag())
+	{
+	case T_DIALOG_YES:
+		{
+			ClearData();
+			this->removeChildByTag(T_TRANSPARENT_BLACK_LAYER);
+			CCMenu* mas_menu = (CCMenu*)this->getChildByTag(T_MAS_MENU);
+			mas_menu->setEnabled(true);
+		}
+		break;
+	case T_DIALOG_NO:
+		{
+			this->removeChildByTag(T_TRANSPARENT_BLACK_LAYER);
+			CCMenu* mas_menu = (CCMenu*)this->getChildByTag(T_MAS_MENU);
+			mas_menu->setEnabled(true);
+		}
+		break;
+	}
 }
 void ECSettingsScene::ClearData() {
 	ECDataProviderExt* data_provider = new ECDataProviderExt("level_state.xml", "levels");
@@ -232,13 +295,12 @@ void ECSettingsScene::ClearData() {
 
 	}
 
-	std::string level_name_stl_string;
 	for (int i = 1; i <= MAX_NUMBER_OF_LEVELS_IN_GAME; i++) {
-		level_name_stl_string = "level" + std::to_string(i);
+		level_name = CCString::createWithFormat("level%i", i);
 		//CCLOG("LEVEL_PLAYED: %s", level_name_stl_string.c_str());
-		ECDataProvider::SetLevelPLayed(level_name_stl_string, false);
-		ECDataProvider::SetBestScoreForLevel(level_name_stl_string, 0);
-		ECDataProvider::SetBestTimeForLevel(level_name_stl_string, 0.0);
+		ECDataProvider::SetLevelPLayed(level_name->getCString(), false);
+		ECDataProvider::SetBestScoreForLevel(level_name->getCString(), 0);
+		ECDataProvider::SetBestTimeForLevel(level_name->getCString(), 0.0);
 	}
 
 	ECDataProvider::SetGeneralScore("", 0);
@@ -264,13 +326,12 @@ void* ECSettingsScene::CallFromThread(void*) {
 
 	}
 
-	std::string level_name_stl_string;
 	for (int i = 1; i <= MAX_NUMBER_OF_LEVELS_IN_GAME; i++) {
-		level_name_stl_string = "level" + std::to_string(i);
+		level_name = CCString::createWithFormat("level%i", i);
 		//CCLOG("LEVEL_PLAYED: %s", level_name_stl_string.c_str());
-		ECDataProvider::SetLevelPLayed(level_name_stl_string, false);
-		ECDataProvider::SetBestScoreForLevel(level_name_stl_string, 0);
-		ECDataProvider::SetBestTimeForLevel(level_name_stl_string, 0.0);
+		ECDataProvider::SetLevelPLayed(level_name->getCString(), false);
+		ECDataProvider::SetBestScoreForLevel(level_name->getCString(), 0);
+		ECDataProvider::SetBestTimeForLevel(level_name->getCString(), 0.0);
 	}
 
 	ECDataProvider::SetGeneralScore("", 0);
