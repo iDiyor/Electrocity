@@ -2,8 +2,10 @@
 //	diyor.islomov@gmail.com || @iDiyor 
 #include "ECTower.h"
 #include "ECGameScene.h"
+#include "ECBuilding.h"
 
-ECTower::ECTower()
+ECTower::ECTower() : 
+	is_collision_with_building(false)
 {
 	
 }
@@ -89,6 +91,45 @@ int ECTower::GetTowerState() const
 {
 	return tower_state_;
 }
+CCPoint ECTower::GetTouchStartPoint() {
+	return touch_start_point_;
+}
+bool ECTower::CheckCollisionWithBuilding(ECBuilding* building) {
+	
+	// tower`s collision boundary
+	CCPoint tower_top_point = ccp(this->getPosition().x - (this->getContentSize().width * 0.08f), 
+								  this->getPosition().y + (this->getContentSize().height * 0.40f));
+	CCPoint tower_bottom_point = ccp(tower_top_point.x, tower_top_point.y - (this->getContentSize().height * 0.80f));
+
+	// building`s collision boundary
+	CCPoint building_position = building->getPosition();
+	CCSize building_sprite_size = building->getContentSize();
+	float building_sprite_scale = building->getScale();
+
+	CCPoint left_bottom_point	= ccp(building_position.x - (building_sprite_size.width * (0.40f * building_sprite_scale)),
+									  building_position.y + (building_sprite_size.height * (0.10f * building_sprite_scale)));
+	CCPoint left_top_point		= ccp(left_bottom_point.x, left_bottom_point.y + (building_sprite_size.height * (0.10f * building_sprite_scale)));
+	CCPoint right_top_point		= ccp(left_top_point.x + (building_sprite_size.width * (0.77f * building_sprite_scale)), left_top_point.y);
+	CCPoint right_bottom_point	= ccp(right_top_point.x, left_bottom_point.y);
+	
+
+	float s = 0 , t = 0;
+
+	if ((ccpLineIntersect(tower_top_point, tower_bottom_point, left_bottom_point, left_top_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) ||
+		(ccpLineIntersect(tower_top_point, tower_bottom_point, left_top_point, right_top_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) ||
+		(ccpLineIntersect(tower_top_point, tower_bottom_point, right_top_point, right_bottom_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) || 
+		(ccpLineIntersect(tower_top_point, tower_bottom_point, left_bottom_point, right_bottom_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1)) 
+	{
+		is_collision_with_building = true;
+		return true;
+	}
+	is_collision_with_building = false;
+	return false;
+}
+void ECTower::MoveAnimationIfCollision() {
+
+}
+
 bool ECTower::ccTouchBegan(CCTouch* pTouch, CCEvent* pEvent)
 {
 	CCPoint touch_point = CCDirector::sharedDirector()->convertToGL(pTouch->getLocationInView());
@@ -96,25 +137,33 @@ bool ECTower::ccTouchBegan(CCTouch* pTouch, CCEvent* pEvent)
 
 	if (is_contains_point) 
 	{
-		prev_position_ = touch_point;
 		tower_state_ = ON_TOWER_TOUCH_BEGIN;
+		prev_position_ = touch_point;
+		if (!is_collision_with_building)
+			touch_start_point_ = touch_point;
 	}
 	return is_contains_point;
 }
 void ECTower::ccTouchMoved(CCTouch* pTouch, CCEvent* pEvent)
 {
+	tower_state_ = ON_TOWER_TOUCH_MOVED;
+
 	CCPoint touch_point = CCDirector::sharedDirector()->convertToGL(pTouch->getLocationInView());
 	CCPoint move_to = ccpSub(touch_point, prev_position_);
 
 	this->setPosition(ccpAdd(this->getPosition(), move_to));
 	prev_position_ = touch_point;
 
-	tower_state_ = ON_TOWER_TOUCH_MOVED;
 }
 void ECTower::ccTouchEnded(CCTouch* pTouch, CCEvent* pEvent)
 {
-
 	tower_state_ = ON_TOWER_TOUCH_ENDED;
+
+	if (is_collision_with_building) {
+		CCMoveTo* move_to_old_point = CCMoveTo::create(0.2f, touch_start_point_);
+		this->runAction(move_to_old_point);
+	}
+
 }
 void ECTower::touchDelegateRetain()
 {

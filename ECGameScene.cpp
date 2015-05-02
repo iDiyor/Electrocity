@@ -133,7 +133,7 @@ bool ECGameScene::InitGameLayerToLayer(std::string& level)
 
 
 		// loading level data
-		game_level_data_ = new ECDataProviderExt("data4.xml", "levels", level);
+		game_level_data_ = new ECDataProviderExt("data4.xml", "levels", level.c_str());
 		// set up level
 		this->LoadGameDataForLevel(level.c_str());
 		// seting current level
@@ -156,7 +156,7 @@ bool ECGameScene::InitGameLayerToLayer(std::string& level)
 		this->addChild(level_time_label, Z_UI_LABELS, T_LEVEL_TIME_LABEL);
 
 		// best time label
-		float best_time = ECDataProvider::GetBestTimeForLevel(current_level_);
+		float best_time = ECDataProvider::GetBestTimeForLevel(current_level_.c_str());
 		CCString* best_time_string = CCString::createWithFormat("Best time: %.1f", best_time);
 		CCLabelBMFont* level_best_time_label = CCLabelBMFont::create(best_time_string->getCString(), "general_font.fnt");
 		level_best_time_label->setAnchorPoint(ccp(0.0f, 0.5f));
@@ -171,7 +171,7 @@ bool ECGameScene::InitGameLayerToLayer(std::string& level)
 
 		// audio
 		//audio_manager_ = ECAudioManager::CreateAudioManagerForScene(GAME_SCENE_AUDIO);
-		ECAudioManager::PlayBackgroundMusic(GAME_SCENE_AUDIO);
+		//ECAudioManager::PlayBackgroundMusic(GAME_SCENE_AUDIO);
 
 		this->scheduleUpdate();
 
@@ -188,8 +188,11 @@ void ECGameScene::update(float delta)
 		if (tower->GetTowerState() == ON_TOWER_TOUCH_MOVED || tower->GetTowerState() == ON_TOWER_TOUCH_ENDED)
 		{
 			this->ResetLines();
-			if (this->CheckForCollision())
+
+			if (this->CheckForLineAndBuildingCollision())
 				break;
+
+			//this->CheckForTowerAndBuildingCollision(tower);
 		}
 	}
 	
@@ -350,12 +353,14 @@ void ECGameScene::ResetLines()
 		}
 	}
 }
-bool ECGameScene::CheckForCollision()
+bool ECGameScene::CheckForLineAndBuildingCollision()
 {
+	ECLine* line = NULL;
+	ECBuilding* building = NULL;
 	for (int i = 0; i < lines_.size(); i++) {
-		ECLine* line = dynamic_cast<ECLine*>(lines_.at(i));
+		line = dynamic_cast<ECLine*>(lines_.at(i));
 		for (int j = 0; j < buildings_.size(); j++) {
-			ECBuilding* building = dynamic_cast<ECBuilding*>(buildings_.at(j));
+			building = dynamic_cast<ECBuilding*>(buildings_.at(j));
 
 			if (line->CheckCollisionWithBuilding(building) && building->GetContactState() == NO_CONTACT) {
 				building->SetContactedLineIndex(i);
@@ -381,6 +386,20 @@ bool ECGameScene::CheckForCollision()
 	
 	return CheckForWinState();
 }
+bool ECGameScene::CheckForTowerAndBuildingCollision(ECTower* tower) {
+	ECBuilding* building = NULL;
+	for (int i = 0; i < buildings_.size(); i++) {
+		building = dynamic_cast<ECBuilding*>(buildings_.at(i));
+		if (tower->CheckCollisionWithBuilding(building)) {
+			building->setColor(ccc3(255,0,0));
+			return true;
+		} else {
+			building->setColor(ccc3(255,255,255));
+		}
+	}
+	return false;
+}
+
 bool ECGameScene::CheckForWinState() {
 	
 	// win situation
@@ -583,8 +602,8 @@ void ECGameScene::WinGame() {
 	this->SaveAchievements(game_timer_, score);
 	this->SaveLevelData();
 
-	float best_time = ECDataProvider::GetBestTimeForLevel(current_level_);
-	int best_score = ECDataProvider::GetBestScoreForLevel(current_level_);
+	float best_time = ECDataProvider::GetBestTimeForLevel(current_level_.c_str());
+	int best_score = ECDataProvider::GetBestScoreForLevel(current_level_.c_str());
 
 
 	/**************************************************
@@ -893,9 +912,11 @@ int ECGameScene::GetScoreMultiplier() const{
 	return score_multiplier;
 }
 void ECGameScene::SaveAchievements(const float time, const int score) const{
-	ECDataProvider::SetBestTimeForLevel(time, current_level_);
-	ECDataProvider::SetBestScoreForLevel(score, current_level_);
-	ECDataProvider::SetGeneralScore(score);
+	ECDataProvider::SetGeneralScore(current_level_.c_str(), score);
+	ECDataProvider::SetLevelPLayed(current_level_.c_str(), true);
+	ECDataProvider::SetBestTimeForLevel(current_level_.c_str(), time);
+	ECDataProvider::SetBestScoreForLevel(current_level_.c_str(), score);
+
 }
 void ECGameScene::SaveLevelData() {
 	ECDataProviderExt* data_provider = new ECDataProviderExt("level_state.xml", "levels");

@@ -93,7 +93,8 @@ private:
 	void CreateLines(bool is_lines_loop);
 	void ResetLines();
 	void ResetGameObjectsOfType(NodeType node_type);
-	bool CheckForCollision();
+	bool CheckForLineAndBuildingCollision();
+	bool CheckForTowerAndBuildingCollision(ECTower* tower);
 	bool CheckForWinState();
 
 	// ui control methods
@@ -107,6 +108,7 @@ private:
 	void LevelSelectLayer(CCObject* pSender);	/*! < goes back to level select layer from game layer. From paused or won state, level select button provided as option*/ 
 	void PauseMenuItemClicked(CCObject* pSednder); 
 	void WinGame();
+	
 	/**
 	* Method that is scheduled to update (like timer) label text to a given number.
 	* Just for animation effect. 

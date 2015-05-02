@@ -7,6 +7,8 @@
 
 using namespace cocos2d;
 
+class ECBuilding;
+
 typedef enum  {
 	ON_TOWER_TOUCH_BEGIN = 101,
 	ON_TOWER_TOUCH_MOVED,
@@ -31,6 +33,9 @@ public:
 	void PlayDustAnimation();
 
 	int GetTowerState() const;
+	CCPoint GetTouchStartPoint();
+	bool CheckCollisionWithBuilding(ECBuilding* building);
+	void MoveAnimationIfCollision();
 
 	void setPosition(const CCPoint& position);
 
@@ -43,6 +48,8 @@ public:
 
 private:
 	CCPoint prev_position_;
+	CCPoint touch_start_point_;
 	TowerState tower_state_;
+	bool is_collision_with_building;
 };
 #endif //__EC_TOWER_H__
