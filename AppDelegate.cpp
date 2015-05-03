@@ -3,6 +3,7 @@
 #include "ECSceneManager.h"
 #include "ECAudioManager.h"
 #include "SimpleAudioEngine.h"
+#include "NativeUtils.h"
 
 USING_NS_CC;
 using namespace CocosDenshion;
@@ -67,8 +68,15 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     // run
     //pDirector->runWithScene(pScene);
+
+
 	ECAudioManager::PlayBackgroundMusic(GAME_SCENE_AUDIO);
 	ECSceneManager::GoMainMenuScene();
+
+	if (!NativeUtils::isSignedIn()) {
+	    	NativeUtils::signIn();
+	}
+
     return true;
 }
 
