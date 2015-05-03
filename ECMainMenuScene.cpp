@@ -121,7 +121,7 @@ bool ECMainMenuLayer::init()
 		//audio_manager_->PlayBackgroundMusic();
 		//ECAudioManager::PlayBackgroundMusic(GAME_SCENE_AUDIO);
 		if (ECDataProvider::GetGameLaunchCounter() == 0) {
-			ECAudioManager::MusicSetting(true, MAIN_MENU_SCENE_AUDIO);
+			ECAudioManager::MusicSetting(true, GAME_SCENE_AUDIO);
 			ECAudioManager::SoundSetting(true);
 			ECDataProvider::SetGameLaunchCounter(1);
 
