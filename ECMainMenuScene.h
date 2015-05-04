@@ -26,6 +26,11 @@ private:
 			T_PLAY,
 			T_SETTINGS,
 			T_LEADERBOARDS,
+			T_PSL_MENU, //PLAY - SETTINGS - LEADERBOARDS button container menu tag
+			T_TRANSPARENT_BLACK_LAYER,
+			T_EXIT_DIALOG,
+			T_EXIT_DIALOG_YES,
+			T_EXIT_DIALOG_NO
 	};
 
 	/*
@@ -34,6 +39,12 @@ private:
 	* Settings
 	*/
 	void onButtonClicked(CCObject* sender);
+	// 
+	void ShowExitDialog();
+	void OnExitDialogButtonClicked(CCObject* sender);
+
+	// used in Android back button
+	virtual void keyBackClicked();
 
 	CCSize screen_size_;
 	//ECAudioManager* audio_manager_;

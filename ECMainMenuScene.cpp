@@ -47,6 +47,8 @@ bool ECMainMenuLayer::init()
 	do
 	{
 		CC_BREAK_IF(!CCLayer::init());
+		
+		this->setKeypadEnabled(true);
 
 		CCSize visible_size = CCDirector::sharedDirector()->getVisibleSize();
 		CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
@@ -114,6 +116,7 @@ bool ECMainMenuLayer::init()
 		// parent menu
 		CCMenu* menu = CCMenu::create(play_button, settings_button, leaderboards_button, NULL);
 		menu->setPosition(ccp(0,0));
+		menu->setTag(T_PSL_MENU);
 		this->addChild(menu);
 
 		// audio
@@ -163,4 +166,76 @@ void ECMainMenuLayer::onButtonClicked(CCObject* pSender)
 		break;
 	}
 }
+void ECMainMenuLayer::ShowExitDialog() {
+	// audio
+	ECAudioManager::PlayButtonClickSound(MAIN_MENU_SCENE_AUDIO);
+	
+	/*pthread_t thread_1;
+	pthread_create(&thread_1, NULL, &ECSettingsScene::CallFromThread, NULL);
+	pthread_join(thread_1, NULL);*/
+
+	CCMenu* psl_menu = (CCMenu*)this->getChildByTag(T_PSL_MENU);
+	psl_menu->setEnabled(false);
+
+	// black shaded transparent background layer
+	CCLayerColor* dialog_transparent_background_layer = CCLayerColor::create(ccc4(0,0,0,100));
+	dialog_transparent_background_layer->setTag(T_TRANSPARENT_BLACK_LAYER);
+	this->addChild(dialog_transparent_background_layer);
+	
+	CCSprite* game_exit_dialog = CCSprite::createWithSpriteFrameName("exit_game_dialog.png");
+	game_exit_dialog->setPosition(ccp(screen_size_.width * 0.5f, screen_size_.height * 0.5f));
+	dialog_transparent_background_layer->addChild(game_exit_dialog);
+
+	CCSprite* dialog_yes_button = CCSprite::createWithSpriteFrameName("exit_game_dialog_yes.png");
+	CCSprite* dialog_no_button = CCSprite::createWithSpriteFrameName("exit_game_dialog_no.png");
+
+	CCMenuItemSprite* dialog_yes_button_item = CCMenuItemSprite::create(dialog_yes_button, dialog_yes_button, NULL, this, menu_selector(ECMainMenuLayer::OnExitDialogButtonClicked));
+	CCMenuItemSprite* dialog_no_button_item = CCMenuItemSprite::create(dialog_no_button, dialog_no_button, NULL, this, menu_selector(ECMainMenuLayer::OnExitDialogButtonClicked));
+	dialog_yes_button_item->setPosition(ccp(game_exit_dialog->getContentSize().width * 0.22f, game_exit_dialog->getContentSize().height * 0.10f * -1));
+	dialog_no_button_item->setPosition(ccp(game_exit_dialog->getContentSize().width * 0.79f, game_exit_dialog->getContentSize().height * 0.10f * -1));
+	dialog_yes_button_item->setTag(T_EXIT_DIALOG_YES);
+	dialog_no_button_item->setTag(T_EXIT_DIALOG_NO);
+
+	CCMenu* menu = CCMenu::create(dialog_yes_button_item, dialog_no_button_item, NULL);
+	menu->setPosition(ccp(0,0));
+	game_exit_dialog->addChild(menu);
+
+	game_exit_dialog->setScale(0.1f);
+
+	CCScaleTo* scale_up_2X = CCScaleTo::create(0.2f, 1.5f);
+	CCMoveTo* move_up = CCMoveTo::create(0.2f, ccp(screen_size_.width * 0.5f, screen_size_.height * 0.6f));
+	CCScaleTo* scale_up_1X = CCScaleTo::create(0.2f, 1.0f);
+	CCMoveTo* move_down = CCMoveTo::create(0.2f, ccp(screen_size_.width * 0.5f, screen_size_.height * 0.5f));
+	CCSpawn* spawn_1 = CCSpawn::create(move_up, scale_up_2X, NULL);
+	CCSpawn* spawn_2 = CCSpawn::create(move_down, scale_up_1X, NULL);
+	CCSequence* sequence = CCSequence::create(spawn_1, spawn_2, NULL);
+	game_exit_dialog->runAction(sequence);
+}
+
+void ECMainMenuLayer::OnExitDialogButtonClicked(CCObject* sender) {
+	// audio
+	ECAudioManager::PlayButtonClickSound(SETTINGS_SCENE_AUDIO);
+
+	CCMenuItem* item = (CCMenuItem*)sender;
+	switch (item->getTag())
+	{
+	case T_EXIT_DIALOG_YES:
+		{
+			CCDirector::sharedDirector()->end();
+		}
+		break;
+	case T_EXIT_DIALOG_NO:
+		{
+			this->removeChildByTag(T_TRANSPARENT_BLACK_LAYER);
+			CCMenu* mas_menu = (CCMenu*)this->getChildByTag(T_PSL_MENU);
+			mas_menu->setEnabled(true);
+		}
+		break;
+	}
+}
+
+void ECMainMenuLayer::keyBackClicked() {
+	ShowExitDialog();
+}
+
 
