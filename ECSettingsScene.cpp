@@ -50,6 +50,8 @@ bool ECSettingsScene::init() {
   bool is_success = false;
   do {
 		CC_BREAK_IF(!CCLayer::init());
+
+		this->setKeypadEnabled(true);
     
 		CCSize visible_size = CCDirector::sharedDirector()->getVisibleSize();
 		CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
@@ -137,7 +139,8 @@ bool ECSettingsScene::init() {
 																 NULL,
 																 this,
 																 menu_selector(ECSettingsScene::GoMainMenu));
-		back_button->setPosition(ccp(back_button->getContentSize().width * 0.7f, back_button->getContentSize().height * 1.2f));
+		back_button->setPosition(ccp(back_button->getContentSize().width * 0.7f, 
+									 screen_size_.height - visible_size.height + back_button->getContentSize().height * 0.6f));
 		CCMenu* menu = CCMenu::create(back_button, music_button, about_button, sound_button, trashcan_button,NULL);
 		menu->setPosition(ccp(0,0));
 		this->addChild(menu, 0, T_MAS_MENU);
@@ -342,4 +345,7 @@ void* ECSettingsScene::CallFromThread(void*) {
 	data_provider = NULL;
 
 	return NULL;
+}
+void ECSettingsScene::keyBackClicked() {
+	this->GoMainMenu(NULL);
 }

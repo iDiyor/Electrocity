@@ -9,7 +9,7 @@ USING_NS_CC;
 
 class ECAudioManager;
 
-class ECSettingsScene : CCLayer
+class ECSettingsScene : public CCLayer
 {
 public:
 
@@ -51,6 +51,9 @@ private:
 	void OnDialogButtonClicked(CCObject* sender);
 	void ClearData();
 	static void* CallFromThread(void*);
+
+	// used in Android back button
+	virtual void keyBackClicked();
 
 	CCSize screen_size_;
 	CCSprite* about_board_;
