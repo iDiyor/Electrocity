@@ -85,6 +85,7 @@ bool ECGameScene::InitGameLayerToLayer(std::string& level)
 	{
 		CC_BREAK_IF(!CCLayer::init());
 		this->setTouchEnabled(true);
+		this->setKeypadEnabled(true);
 
 		instance_of_gamelayer_ = this;
 
@@ -114,7 +115,7 @@ bool ECGameScene::InitGameLayerToLayer(std::string& level)
 																	 this,
 																	 menu_selector(ECGameScene::PauseGame));
 		game_pause_button->setPosition(ccp(screen_size_.width - game_pause_button->getContentSize().width * 0.5f - 2,
-										 screen_size_.height - game_pause_button->getContentSize().height * 0.5f - 2));
+										   screen_size_.height - game_pause_button->getContentSize().height * 0.5f - 2));
 
 		// restart
 		CCSprite* game_restart_button_sprite = CCSprite::createWithSpriteFrameName("restart_button.png");
@@ -145,7 +146,7 @@ bool ECGameScene::InitGameLayerToLayer(std::string& level)
 		CCString* current_level_string = CCString::createWithFormat("Level %i", current_level_number);
 		CCLabelBMFont* current_level_Label = CCLabelBMFont::create(current_level_string->getCString(), "general_font.fnt");
 		current_level_Label->setPosition(ccp(screen_size_.width - current_level_Label->getContentSize().width * 0.6f ,
-										current_level_Label->getContentSize().height * 0.5f));
+											screen_size_.height - visible_size.height + current_level_Label->getContentSize().height * 0.5f));
 		this->addChild(current_level_Label);
 
 		// timer label
@@ -956,6 +957,9 @@ void ECGameScene::ccTouchesMoved(CCSet* pTouches, CCEvent* pEvent)
 void ECGameScene::ccTouchesEnded(CCSet* pTouches, CCEvent* pEvent)
 {
 
+}
+void ECGameScene::keyBackClicked() {
+	PauseGame(NULL);
 }
 CCPoint ECGameScene::ConvertTouchToPoint(CCTouch* touch)
 {

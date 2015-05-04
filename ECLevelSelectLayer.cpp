@@ -42,6 +42,8 @@ bool ECLevelSelectLayer::init()
 	{
 		CC_BREAK_IF(!CCLayer::init());
 
+		this->setKeypadEnabled(true);
+
 		CCSize visible_size = CCDirector::sharedDirector()->getVisibleSize();
 		CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
 
@@ -91,7 +93,7 @@ bool ECLevelSelectLayer::init()
 		CCString* total_score_string = CCString::createWithFormat("Score: %i", ECDataProvider::GetGeneralScore());
 		CCLabelBMFont* total_score_label = CCLabelBMFont::create(total_score_string->getCString(), "general_font.fnt");
 		total_score_label->setPosition(ccp(screen_size_.width - total_score_label->getContentSize().width * 0.6f, 
-										   total_score_label->getContentSize().height * 1.2f));
+										   screen_size_.height - visible_size.height + total_score_label->getContentSize().height * 0.6f));
 		this->addChild(total_score_label);
 
 		// main menu back button
@@ -102,7 +104,8 @@ bool ECLevelSelectLayer::init()
 																 NULL,
 																 this,
 																 menu_selector(ECLevelSelectLayer::GoMainMenu));
-		back_button->setPosition(ccp(back_button->getContentSize().width * 0.7f, back_button->getContentSize().height * 1.2f));
+		back_button->setPosition(ccp(back_button->getContentSize().width * 0.7f, 
+									 screen_size_.height - visible_size.height + back_button->getContentSize().height * 0.6f));
 		CCMenu* menu = CCMenu::create(back_button, NULL);
 		menu->setPosition(ccp(0,0));
 		this->addChild(menu);
@@ -131,4 +134,7 @@ void ECLevelSelectLayer::GoMainMenu(CCObject* sender) {
 	// audio
 	ECAudioManager::PlayButtonClickSound(LEVEL_SELECT_SCENE_AUDIO);
 	ECSceneManager::GoMainMenuScene();
+}
+void ECLevelSelectLayer::keyBackClicked() {
+	GoMainMenu(NULL);
 }

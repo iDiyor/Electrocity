@@ -172,6 +172,8 @@ private:
 	virtual void ccTouchesMoved(CCSet* pTouches, CCEvent* pEvent);
 	virtual void ccTouchesEnded(CCSet* pTouches, CCEvent* pEvent);
 
+	// used in Android back button
+	virtual void keyBackClicked();
 	/////////////////////////////////////////////////////////////////////////////////
 	// 
 	/////////////////////////////////////////////////////////////////////////////////
@@ -184,6 +186,7 @@ private:
 	std::vector<CCSprite*> buildings_;				/*!< vector container that stores all the buildings(houses) in a level */
 	std::vector<CCSprite*> buildings_with_on_lights_;
 	std::vector<CCSprite*> lines_;					/*!< vector container that stores all the lines connected to towers in a level */
+	std::vector<CCSprite*> lines_shadow_;
 
 	CCSpriteBatchNode* game_layer_spritesheet_;		/*!< main game spritesheet that contains all the sprites(background,
 													buildings, towers, line, pause - win state sprites, UI (restart, pause)

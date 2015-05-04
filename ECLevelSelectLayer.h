@@ -27,10 +27,13 @@ public:
 
 	ECLevelSelectLayer();
 	~ECLevelSelectLayer();
+	
+	
 
 private:
-
 	void GoMainMenu(CCObject* sender);
+	virtual void keyBackClicked();
+	
 
 	CCSize screen_size_;
 	CCScrollView* scroll_view_;
