@@ -51,8 +51,7 @@ bool ECTower::InitTowerWithFileName(const char* filename)
 	}while (0);
 	return is_success;
 }
-void ECTower::setPosition(const CCPoint& position)
-{
+void ECTower::setPosition(const CCPoint& position) {
 	CCSize screen_size = CCDirector::sharedDirector()->getWinSize();
 	CCPoint updated_position = position;
 
@@ -74,8 +73,7 @@ void ECTower::setPosition(const CCPoint& position)
 	}
 	CCSprite::setPosition(updated_position);
 }
-bool ECTower::IsTouchOnMe(const CCTouch* touch)
-{
+bool ECTower::IsTouchOnMe(const CCTouch* touch) {
 	CCPoint touch_point = touch->getLocationInView();
 	touch_point = CCDirector::sharedDirector()->convertToGL(touch_point);
 	if (this->boundingBox().containsPoint(touch_point))
@@ -83,17 +81,32 @@ bool ECTower::IsTouchOnMe(const CCTouch* touch)
 
 	return false;
 }
-void ECTower::PlayDustAnimation()
-{
-	CCLOG("DUST_ANIM");
+void ECTower::PlayDustAnimation() {
+	CCSprite* dust_sprite = CCSprite::createWithSpriteFrameName("dust.png");
+	dust_sprite->setPosition(ccp(this->getContentSize().width * 0.42f, this->getContentSize().height * 0.08f));
+	dust_sprite->setOpacity(130);
+	dust_sprite->setScale(0.1f);
+	this->addChild(dust_sprite);
+
+	CCScaleTo* scale_up = CCScaleTo::create(0.3f, 1.0f);
+	CCCallFuncO* sprite_clean_up = CCCallFuncO::create(this, callfuncO_selector(ECTower::CleanUpDustAnimation), dust_sprite);
+	CCSequence* sequence = CCSequence::create(scale_up, sprite_clean_up, NULL);
+	dust_sprite->runAction(sequence);
 }
-int ECTower::GetTowerState() const
-{
+
+void ECTower::CleanUpDustAnimation(CCObject* sender) {
+	CCSprite* sprite = (CCSprite*)sender;
+	sprite->removeFromParentAndCleanup(true);
+}
+
+int ECTower::GetTowerState() const {
 	return tower_state_;
 }
+
 CCPoint ECTower::GetTouchStartPoint() {
 	return touch_start_point_;
 }
+
 bool ECTower::CheckCollisionWithBuilding(ECBuilding* building) {
 	
 	// tower`s collision boundary
@@ -130,8 +143,7 @@ void ECTower::MoveAnimationIfCollision() {
 
 }
 
-bool ECTower::ccTouchBegan(CCTouch* pTouch, CCEvent* pEvent)
-{
+bool ECTower::ccTouchBegan(CCTouch* pTouch, CCEvent* pEvent) {
 	CCPoint touch_point = CCDirector::sharedDirector()->convertToGL(pTouch->getLocationInView());
 	bool is_contains_point = this->boundingBox().containsPoint(touch_point);
 
@@ -139,13 +151,14 @@ bool ECTower::ccTouchBegan(CCTouch* pTouch, CCEvent* pEvent)
 	{
 		tower_state_ = ON_TOWER_TOUCH_BEGIN;
 		prev_position_ = touch_point;
-		if (!is_collision_with_building)
-			touch_start_point_ = touch_point;
+
+		/*if (!is_collision_with_building)
+			touch_start_point_ = touch_point;*/
 	}
 	return is_contains_point;
 }
-void ECTower::ccTouchMoved(CCTouch* pTouch, CCEvent* pEvent)
-{
+
+void ECTower::ccTouchMoved(CCTouch* pTouch, CCEvent* pEvent) {
 	tower_state_ = ON_TOWER_TOUCH_MOVED;
 
 	CCPoint touch_point = CCDirector::sharedDirector()->convertToGL(pTouch->getLocationInView());
@@ -155,22 +168,22 @@ void ECTower::ccTouchMoved(CCTouch* pTouch, CCEvent* pEvent)
 	prev_position_ = touch_point;
 
 }
-void ECTower::ccTouchEnded(CCTouch* pTouch, CCEvent* pEvent)
-{
+
+void ECTower::ccTouchEnded(CCTouch* pTouch, CCEvent* pEvent) {
 	tower_state_ = ON_TOWER_TOUCH_ENDED;
 
-	if (is_collision_with_building) {
+	/*if (is_collision_with_building) {
 		CCMoveTo* move_to_old_point = CCMoveTo::create(0.2f, touch_start_point_);
 		this->runAction(move_to_old_point);
-	}
-
+	}*/
+	this->PlayDustAnimation();
 }
-void ECTower::touchDelegateRetain()
-{
+
+void ECTower::touchDelegateRetain() {
 	this->retain();
 }
-void ECTower::touchDelegateRelease()
-{
+
+void ECTower::touchDelegateRelease() {
 	this->release();
 }
 

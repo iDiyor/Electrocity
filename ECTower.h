@@ -31,6 +31,7 @@ public:
 
 	bool IsTouchOnMe(const CCTouch* touch);
 	void PlayDustAnimation();
+	void CleanUpDustAnimation(CCObject* sender);
 
 	int GetTowerState() const;
 	CCPoint GetTouchStartPoint();
