@@ -157,6 +157,13 @@ void ECDataProviderExt::SetBlockForLevel(const char* level, bool is_blocked) {
 	xml_node level_node = level_data_->child(level);
 	level_node.attribute("is_blocked").set_value(is_blocked);
 }
+bool ECDataProviderExt::CheckNodeAndAttributeForBoolValue(const char* node, const char* attribute) {
+	xml_node level_node = level_data_->child(node); // <levels>
+											  //    <level1> .... 
+											  //	.....
+	return level_node.attribute(attribute).as_bool();
+}
+
 std::string ECDataProviderExt::GetPathToFile(const char* file_name) {
 
 	std::string path = "";

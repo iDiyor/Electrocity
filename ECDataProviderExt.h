@@ -55,6 +55,10 @@ public:
 	*/
 	void SetBlockForLevel(const char* level, bool is_blocked);
 
+	// check node for specific attribute
+	bool CheckNodeAndAttributeForBoolValue(const char* node, const char* attribute);
+	
+
 	static void MoveXMLFileFromAssetsToWritabalePath(const char* file_name);
 private:
 
