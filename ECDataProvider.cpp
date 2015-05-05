@@ -2,6 +2,9 @@
 //	diyor.islomov@gmail.com || @iDiyor 
 #include "ECDataProvider.h"
 #include "ECDataProviderExt.h"
+#include "ECGameHelper.h"
+#include "NativeUtils.h"
+
 
 #define BEST_TIME_KEY "BEST_TIME"
 #define BEST_SCORE_KEY "BEST_SCORE"
@@ -47,6 +50,7 @@ void ECDataProvider::SetGeneralScore(const char* level, const int score) {
 					int old_score = GetGeneralScore();
 					int new_score = old_score + score;
 					CCUserDefault::sharedUserDefault()->setIntegerForKey(GENERAL_SCORE_KEY, new_score);
+					NativeUtils::submitScore(LEADERBOARD_HIGH_SCORE, new_score);
 			}
 	}
 }
