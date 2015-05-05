@@ -48,6 +48,7 @@ private:
 
 	CCSize screen_size_;
 	//ECAudioManager* audio_manager_;
+	bool is_exit_dialog_shown;
 };
 
 

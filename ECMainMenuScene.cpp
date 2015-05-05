@@ -5,8 +5,10 @@
 #include "ECDataProvider.h"
 #include "ECDataProviderExt.h"
 #include "ECAudioManager.h"
+#include "NativeUtils.h"
 
-ECMainMenuLayer::ECMainMenuLayer()
+ECMainMenuLayer::ECMainMenuLayer() :
+	is_exit_dialog_shown(false)
 {
 
 }
@@ -155,7 +157,7 @@ void ECMainMenuLayer::onButtonClicked(CCObject* pSender)
 	case T_LEADERBOARDS:
 		{
 			ECAudioManager::PlayButtonClickSound(MAIN_MENU_SCENE_AUDIO);
-			ECSceneManager::GoSettingsScene();
+			NativeUtils::showLeaderboard(LEADERBOARD_HIGH_SCORE);
 		}
 		break;
 	default:
@@ -229,13 +231,19 @@ void ECMainMenuLayer::OnExitDialogButtonClicked(CCObject* sender) {
 			this->removeChildByTag(T_TRANSPARENT_BLACK_LAYER);
 			CCMenu* mas_menu = (CCMenu*)this->getChildByTag(T_PSL_MENU);
 			mas_menu->setEnabled(true);
+			is_exit_dialog_shown = false;
 		}
 		break;
 	}
 }
 
 void ECMainMenuLayer::keyBackClicked() {
-	ShowExitDialog();
+	if (!is_exit_dialog_shown) {
+		ShowExitDialog();
+		is_exit_dialog_shown = true;
+	}
+
+		
 }
 
 
