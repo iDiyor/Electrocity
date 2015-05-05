@@ -992,7 +992,7 @@ void ECGameScene::SaveLevelData() {
 			}
 
 			if (temp_int == 15) {
-				NativeUtils::unlockAchievement(ACHIEVEMENT_CHAPTER_ONE_COMPLETED);
+				NativeUtils::unlockAchievement(ACHIEVEMENT_CHAPTER_TWO_COMPLETED);
 			}
 		}
 	}
@@ -1005,7 +1005,7 @@ void ECGameScene::SaveLevelData() {
 			}
 
 			if (temp_int == 15) {
-				NativeUtils::unlockAchievement(ACHIEVEMENT_CHAPTER_ONE_COMPLETED);
+				NativeUtils::unlockAchievement(ACHIEVEMENT_CHAPTER_THREE_COMPLETED);
 			}
 		}
 	}
