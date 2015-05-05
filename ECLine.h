@@ -20,6 +20,7 @@ public:
 	~ECLine();
 	
 	void ResetLineBetweenTowers(ECTower* tower_a, ECTower* tower_b);
+	void ResetLineShadowBetweenTowers(ECTower* tower_a, ECTower* tower_b);
 	bool CheckCollisionWithBuilding(ECBuilding* building);
 
 	CCPoint GetLineEndPoint();
