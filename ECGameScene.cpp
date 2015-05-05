@@ -8,6 +8,9 @@
 #include "ECSceneManager.h"
 #include "ECDataProvider.h"
 #include "ECAudioManager.h"
+#include "ECGameHelper.h"
+#include "NativeUtils.h"
+
 
 #include <cstdlib>
 
@@ -19,6 +22,9 @@
 #define BEST_TIME_KEY "BEST_TIME"
 #define BEST_SCORE_KEY "BEST_SCORE"
 
+
+
+
 ECGameScene::ECGameScene() :
 	game_layer_spritesheet_(NULL),
 	game_level_data_(NULL),
@@ -26,7 +32,8 @@ ECGameScene::ECGameScene() :
 	game_timer_(0),
 	temp_label_(NULL),
 	temp_final_game_score_(0),
-	on_light_building_counter_(0)
+	on_light_building_counter_(0),
+	game_state_(PLAYING)
 {
 
 }
@@ -310,12 +317,22 @@ void ECGameScene::CreateLines(bool is_lines_loop)
 	} else {
 		lines_quantity = towers_.size();
 	}
-
+	
+	// lines
 	for (unsigned int i = 0; i < lines_quantity; i++)
 	{
 		ECLine* line = ECLine::create();
 		game_layer_spritesheet_->addChild(line, Z_LINES);
 		lines_.push_back(line);
+	}
+
+	// line shadows
+	for (unsigned int i = 0; i < lines_quantity; i++)
+	{
+		ECLine* line = ECLine::create();
+		line->setOpacity(30);
+		game_layer_spritesheet_->addChild(line, Z_LINES);
+		lines_shadow_.push_back(line);
 	}
 	this->ResetLines();
 }
@@ -351,6 +368,19 @@ void ECGameScene::ResetLines()
 		{
 			// updating line between two towers | position & scaleX
 			line->ResetLineBetweenTowers(tower_a, tower_b);
+		}
+
+		// line shadows
+		// i must not point to a greater number than lines` number in the array
+		if (i < lines_.size())
+		{
+			line = dynamic_cast<ECLine*>(lines_shadow_.at(i));
+		}
+
+		if (tower_a && tower_b && line)
+		{
+			// updating line between two towers | position & scaleX
+			line->ResetLineShadowBetweenTowers(tower_a, tower_b);
 		}
 	}
 }
@@ -426,6 +456,9 @@ void ECGameScene::PauseGame(CCObject* pSender) {
 
 	// pause the loop | update method.
 	this->PauseGameLoop(true);
+
+	// game state controller
+	game_state_ = PAUSED;
 
 	// black shaded transparent background layer
 	CCLayerColor* pauseShadeTransparentBackgroundLayer = CCLayerColor::create(ccc4(0,0,0,100));
@@ -565,6 +598,9 @@ void ECGameScene::PauseMenuItemClicked(CCObject* pSender) {
 
 			// continue the loop
 			this->PauseGameLoop(false);
+
+			// game state
+			game_state_ = PLAYING;
 		}
 		break;
 	case T_SKIP_LEVEL:
@@ -930,6 +966,64 @@ void ECGameScene::SaveLevelData() {
 	CCString* next_level_name_string = CCString::createWithFormat("level%i", next_level_number);
 	// unlock next level
 	data_provider->SetBlockForLevel(next_level_name_string->getCString(), false);
+	
+	CCString* temp_string;
+	int temp_int;
+	// check for unlock achievements
+	if (current_level_.compare("level15")) {
+		temp_int = 0;
+		for (int i = 1; i <= 15; i++) {
+			temp_string = CCString::createWithFormat("level%i", i);
+			if (data_provider->CheckNodeAndAttributeForBoolValue(temp_string->getCString(), "is_played")) {
+				temp_int++;
+			}
+
+			if (temp_int == 15) {
+				NativeUtils::unlockAchievement(ACHIEVEMENT_CHAPTER_ONE_COMPLETED);
+			}
+		}
+	} 
+	else if (current_level_.compare("level30")) {
+		temp_int = 0;
+		for (int i = 16; i <= 30; i++) {
+			temp_string = CCString::createWithFormat("level%i", i);
+			if (data_provider->CheckNodeAndAttributeForBoolValue(temp_string->getCString(), "is_played")) {
+				temp_int++;
+			}
+
+			if (temp_int == 15) {
+				NativeUtils::unlockAchievement(ACHIEVEMENT_CHAPTER_ONE_COMPLETED);
+			}
+		}
+	}
+	else if (current_level_.compare("level45")) {
+		temp_int = 0;
+		for (int i = 31; i <= 45; i++) {
+			temp_string = CCString::createWithFormat("level%i", i);
+			if (data_provider->CheckNodeAndAttributeForBoolValue(temp_string->getCString(), "is_played")) {
+				temp_int++;
+			}
+
+			if (temp_int == 15) {
+				NativeUtils::unlockAchievement(ACHIEVEMENT_CHAPTER_ONE_COMPLETED);
+			}
+		}
+	}
+	else if (current_level_.compare("level60")) {
+		temp_int = 0;
+		for (int i = 46; i <= 60; i++) {
+			temp_string = CCString::createWithFormat("level%i", i);
+			if (data_provider->CheckNodeAndAttributeForBoolValue(temp_string->getCString(), "is_played")) {
+				temp_int++;
+			}
+
+			if (temp_int == 15) {
+				NativeUtils::unlockAchievement(ACHIEVEMENT_CHAPTER_FOUR_COMPLETED);
+				NativeUtils::unlockAchievement(ACHIEVEMENT_MASTER_OF_ELECTROCITY);
+			}
+		}
+	}
+
 	// saves modified file - xml
 	data_provider->SaveFile();
 	delete data_provider;
@@ -959,7 +1053,9 @@ void ECGameScene::ccTouchesEnded(CCSet* pTouches, CCEvent* pEvent)
 
 }
 void ECGameScene::keyBackClicked() {
-	PauseGame(NULL);
+	if (game_state_ != PAUSED) {
+		PauseGame(NULL);
+	}
 }
 CCPoint ECGameScene::ConvertTouchToPoint(CCTouch* touch)
 {

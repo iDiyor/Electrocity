@@ -27,11 +27,12 @@ public:
 	
 private:
 
-	//typedef enum {
-	//	PLAYING = 10,
-	//	PAUSE,
-	//	WIN
-	//}GameState;
+	typedef enum {
+		IDLE = 10,
+		PLAYING,
+		PAUSED,
+		WON
+	}GameState;
 
 
 	typedef enum {
@@ -213,5 +214,7 @@ private:
 								 on score and best_score labels */
 	int on_light_building_counter_;
 	//ECAudioManager* audio_manager_;
+	// game state
+	GameState game_state_;
 };	
 #endif// __EC_GAME_SCENE_H__
