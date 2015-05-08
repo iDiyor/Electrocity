@@ -10,6 +10,7 @@ using namespace cocos2d;
 using namespace cocos2d::extension;
 
 class ECAudioManager;
+class ECScrollLayer;
 
 class ECLevelSelectLayer : public CCLayer
 {
@@ -36,7 +37,7 @@ private:
 	
 
 	CCSize screen_size_;
-	CCScrollView* scroll_view_;
+	ECScrollLayer* scroller_;
 	ECAudioManager* audio_manager_;
 	
 };

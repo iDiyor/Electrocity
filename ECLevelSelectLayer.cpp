@@ -80,13 +80,13 @@ bool ECLevelSelectLayer::init()
 		level_chapters_array->addObject(chapter_page_three);
 		level_chapters_array->addObject(chapter_page_four);
 
-		ECScrollLayer* scroller = ECScrollLayer::createWithLayersWithOffset(level_chapters_array, 1);
-		scroller->_pages_indicator_normal_color = ccc4(14,134,93,255);
-		scroller->_pages_indicator_selected_color = ccc4(227,164,45,255);
-		scroller->_pages_indicator_position = ccp(screen_size_.width * 0.5f, origin.y + 5);
-		scroller->_margin_off_set = 60.0f;
-		scroller->selectPage(0);
-		this->addChild(scroller);
+		scroller_ = ECScrollLayer::createWithLayersWithOffset(level_chapters_array, 1);
+		scroller_->_pages_indicator_normal_color = ccc4(14,134,93,255);
+		scroller_->_pages_indicator_selected_color = ccc4(227,164,45,255);
+		scroller_->_pages_indicator_position = ccp(screen_size_.width * 0.5f, origin.y + 5);
+		scroller_->_margin_off_set = 40.0f;
+		scroller_->selectPage(ECDataProvider::GetChapterPage());
+		this->addChild(scroller_);
 
 		//this->scheduleUpdate();
 		// total score label
@@ -133,7 +133,9 @@ void ECLevelSelectLayer::scrollViewDidZoom(CCScrollView* view)
 void ECLevelSelectLayer::GoMainMenu(CCObject* sender) {
 	// audio
 	ECAudioManager::PlayButtonClickSound(LEVEL_SELECT_SCENE_AUDIO);
+	ECDataProvider::SetChapterPage(scroller_->getCurrentPage());
 	ECSceneManager::GoMainMenuScene();
+
 }
 void ECLevelSelectLayer::keyBackClicked() {
 	GoMainMenu(NULL);
