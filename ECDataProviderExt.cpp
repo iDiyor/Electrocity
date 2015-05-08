@@ -113,6 +113,30 @@ bool ECDataProviderExt::LoadLinesLoopAttribute()
 	xml_node lines = level_data_->child("lines");
 	return lines.attribute("loop_closed").as_bool();
 }
+
+bool ECDataProviderExt::LoadInsideLines(int* tower_a_index, int* tower_b_index) {
+	xml_node lines = level_data_->child("lines");
+	if (lines.attribute("extra_data").as_bool()) {
+		xml_node line_inside = lines.child("line_inside");
+		*tower_a_index = line_inside.attribute("tower_a_index").as_uint();
+		*tower_b_index = line_inside.attribute("tower_b_index").as_uint();
+		return true;
+	}
+	return false;
+}
+
+bool ECDataProviderExt::LoadOutsideLines(int* tower_a_index, float* pos_x, float* pos_y) {
+	xml_node lines = level_data_->child("lines");
+	if (lines.attribute("extra_data").as_bool()) {
+		xml_node line_inside = lines.child("line_outside");
+		*tower_a_index = line_inside.attribute("tower_a_index").as_uint();
+		*pos_x = line_inside.attribute("pos_x").as_float();
+		*pos_y = line_inside.attribute("pos_y").as_float();
+		return true;
+	}
+	return false;
+}
+
 /*****************************************************************************************
 *****************************************************************************************/
 void ECDataProviderExt::LoadDataForLevelSelectButtons(std::vector<int>& v_open_buttons, 
