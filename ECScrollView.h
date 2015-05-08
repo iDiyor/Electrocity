@@ -69,6 +69,7 @@ public:
 	void removePageWithNumber(int number);
 	void moveToPage(int page);
 	void selectPage(int page);
+	int getCurrentPage();
 
 	int pageNumberForPosition(CCPoint position);
 	void moveToPageEnded();

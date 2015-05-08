@@ -149,6 +149,10 @@ void ECScrollLayer::selectPage(int page)
 	_prev_screen = _current_screen;
 	_current_screen = page;
 }
+int ECScrollLayer::getCurrentPage() {
+	return _current_screen;
+}
+
 void ECScrollLayer::addPage(CCLayer* page)
 {
 	this->addPageWithNumber(page, _layers->count());
