@@ -13,6 +13,7 @@
 #define SOUND_KEY "SOUND_SETTING"
 #define LAUNCH_COUNTER_KEY "LUANCH_COUNT"
 #define LEVEL_PLAYED_KEY "_PLAYED" // level_name + _PLAYED = level1_PLAYED
+#define CHAPTER_SELECT_PAGE "CHAPTER_PAGE"
 
 void ECDataProvider::SetBestTimeForLevel(const char* level, const float time) {
 	//std::string key_string = level + "_" + BEST_TIME_KEY;	// level1_BEST_TIME
@@ -63,6 +64,16 @@ void ECDataProvider::SetLevelPLayed(const char* level, bool is_played) {
 
 	CCUserDefault::sharedUserDefault()->setBoolForKey(key_char, is_played);
 }
+void ECDataProvider::SetChapterPage(int page_number) {
+	if ((page_number == 1 && !GetLevelPLayed("level16")) || 
+		(page_number == 2 && !GetLevelPLayed("level31")) ||
+		(page_number == 3 && !GetLevelPLayed("level46"))) {
+		CCUserDefault::sharedUserDefault()->setIntegerForKey(CHAPTER_SELECT_PAGE, 0);
+	} else {
+		CCUserDefault::sharedUserDefault()->setIntegerForKey(CHAPTER_SELECT_PAGE, page_number);
+	}
+}
+
 void ECDataProvider::SetSettingsParameter(SettingsParameter parameter, bool is_enabled) {
 	switch (parameter)
 	{
@@ -106,6 +117,9 @@ bool ECDataProvider::GetLevelPLayed(const char* level) {
 	strcat(key_char, LEVEL_PLAYED_KEY);
 
 	return CCUserDefault::sharedUserDefault()->getBoolForKey(key_char, false);
+}
+int ECDataProvider::GetChapterPage() {
+	return CCUserDefault::sharedUserDefault()->getIntegerForKey(CHAPTER_SELECT_PAGE);
 }
 bool ECDataProvider::GetSettingsParameter(SettingsParameter parameter) {
 	bool result = false;

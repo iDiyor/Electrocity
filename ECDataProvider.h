@@ -23,6 +23,7 @@ public:
 	static void SetBestScoreForLevel(const char* level, const int score);
 	static void SetGeneralScore(const char* level, const int score);
 	static void SetLevelPLayed(const char* level, bool is_played);
+	static void SetChapterPage(int page_number);
 	/**
 	* Controls state of music and sound. Saves state values in xml file and
 	* when loaded sets buttons parameter based on that.
@@ -42,6 +43,7 @@ public:
 	static int GetBestScoreForLevel(const char* level);
 	static int GetGeneralScore();
 	static bool GetLevelPLayed(const char* level);
+	static int GetChapterPage();
 	/**
 	* Returns loaded data of music, sound to set their state;
 	*/
