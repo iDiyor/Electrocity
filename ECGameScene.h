@@ -93,6 +93,9 @@ private:
 	void CreateBuildingInQuant(const int quantity, const char* image_filename, const float scale);
 	void CreateLines(bool is_lines_loop);
 	void ResetLines();
+	void AttachLines();
+	void AttachExtraInsideLine(int tower_a_index, int tower_b_index);
+	void AttachExtraOutsideLine(int tower_a_index, const char* file_name, float pos_x, float pos_y);
 	void ResetGameObjectsOfType(NodeType node_type);
 	bool CheckForLineAndBuildingCollision();
 	bool CheckForTowerAndBuildingCollision(ECTower* tower);

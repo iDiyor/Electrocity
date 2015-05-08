@@ -129,6 +129,7 @@ bool ECMainMenuLayer::init()
 			ECAudioManager::MusicSetting(true, GAME_SCENE_AUDIO);
 			ECAudioManager::SoundSetting(true);
 			ECDataProvider::SetGameLaunchCounter(1);
+			ECDataProvider::SetChapterPage(0);
 
 			ECDataProviderExt::MoveXMLFileFromAssetsToWritabalePath("level_state.xml");
 		}

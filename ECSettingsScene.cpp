@@ -6,8 +6,6 @@
 #include "ECDataProviderExt.h"
 #include "ECAudioManager.h"
 
-#include "pthread.h"
-
 #define MAX_NUMBER_OF_LEVELS_IN_GAME 60
 
 

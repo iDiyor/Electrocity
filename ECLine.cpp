@@ -4,19 +4,17 @@
 #include "ECTower.h"
 #include "ECBuilding.h"
 
-ECLine::ECLine()
-{
+ECLine::ECLine() {
 
 }
-ECLine::~ECLine()
-{
+
+ECLine::~ECLine() {
 
 }
-bool ECLine::init()
-{
+
+bool ECLine::init() {
 	bool is_success = false;
-	do
-	{
+	do {
 		CC_BREAK_IF(!CCSprite::initWithSpriteFrameName("line.png"));
 
 		this->setAnchorPoint(ccp(0.0f, 0.5f));
@@ -25,58 +23,11 @@ bool ECLine::init()
 	}while(0);
 	return is_success;
 }
-void ECLine::ResetLineBetweenTowers(ECTower* tower_a, ECTower* tower_b) 
-{
-	CCPoint tower_a_point = ccp(tower_a->getPosition().x - (tower_a->getContentSize().width * 0.5f * 0.116f),
-							  tower_a->getPosition().y + (tower_a->getContentSize().height * 0.37f));
-	CCPoint tower_b_point = ccp(tower_b->getPosition().x - (tower_b->getContentSize().width * 0.5f * 0.116f),
-							  tower_b->getPosition().y + (tower_b->getContentSize().height * 0.37f));
- 
-	float diff_x = tower_b_point.x - tower_a_point.x; // x difference
-	float diff_y = tower_b_point.y - tower_a_point.y; // y difference
 
-	//float diff = ccpDistance(towerPointB, towerPointA);
-
-	float length = sqrtf((diff_x*diff_x) + (diff_y*diff_y)); // distance between two points
-	float angle_in_rad = atan2f(diff_y, diff_x); 
-	float angle_in_deg = CC_RADIANS_TO_DEGREES(angle_in_rad) * -1;
-
-	this->setPosition(tower_a_point);
-	this->setRotation(angle_in_deg);
-	this->setScaleX(length / this->getContentSize().width);
-
-	line_start_point_ = tower_a_point;
-	line_end_point_   = tower_b_point;
-
-	//_beginLinePoint = this->getPosition();
-	//line_end_point_ = tower_b_point;//ccpAdd(this->getPosition(), ccpMult(ccp(cos(angle_in_rad), sin(angle_in_rad)), length));
+void ECLine::SetLineType(LineType line_type) {
+	line_type_ = line_type;
 }
-void ECLine::ResetLineShadowBetweenTowers(ECTower* tower_a, ECTower* tower_b) 
-{
-	CCPoint tower_a_point = ccp(tower_a->getPosition().x + (tower_a->getContentSize().width * 0.5f * 0.62f),
-							  tower_a->getPosition().y - (tower_a->getContentSize().height * 0.24f));
-	CCPoint tower_b_point = ccp(tower_b->getPosition().x + (tower_b->getContentSize().width * 0.5f * 0.62f),
-							  tower_b->getPosition().y - (tower_b->getContentSize().height * 0.24f));
- 
-	float diff_x = tower_b_point.x - tower_a_point.x; // x difference
-	float diff_y = tower_b_point.y - tower_a_point.y; // y difference
 
-	//float diff = ccpDistance(towerPointB, towerPointA);
-
-	float length = sqrtf((diff_x*diff_x) + (diff_y*diff_y)); // distance between two points
-	float angle_in_rad = atan2f(diff_y, diff_x); 
-	float angle_in_deg = CC_RADIANS_TO_DEGREES(angle_in_rad) * -1;
-
-	this->setPosition(tower_a_point);
-	this->setRotation(angle_in_deg);
-	this->setScaleX(length / this->getContentSize().width);
-
-	line_start_point_ = tower_a_point;
-	line_end_point_   = tower_b_point;
-
-	//_beginLinePoint = this->getPosition();
-	//line_end_point_ = tower_b_point;//ccpAdd(this->getPosition(), ccpMult(ccp(cos(angle_in_rad), sin(angle_in_rad)), length));
-}
 bool ECLine::CheckCollisionWithBuilding(ECBuilding* building) {
 
 	CCPoint building_position = building->getPosition();
@@ -91,21 +42,52 @@ bool ECLine::CheckCollisionWithBuilding(ECBuilding* building) {
 
 	float s = 0 , t = 0;
 
-	if ((ccpLineIntersect(line_start_point_, line_end_point_, left_bottom_point, left_top_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) ||
-		(ccpLineIntersect(line_start_point_, line_end_point_, left_top_point, right_top_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) ||
-		(ccpLineIntersect(line_start_point_, line_end_point_, right_top_point, right_bottom_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) || 
-		(ccpLineIntersect(line_start_point_, line_end_point_, left_bottom_point, right_bottom_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1)) 
+	if ((ccpLineIntersect(line_head_, line_tail_, left_bottom_point, left_top_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) ||
+		(ccpLineIntersect(line_head_, line_tail_, left_top_point, right_top_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) ||
+		(ccpLineIntersect(line_head_, line_tail_, right_top_point, right_bottom_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1) || 
+		(ccpLineIntersect(line_head_, line_tail_, left_bottom_point, right_bottom_point, &s, &t) && s >= 0 && s <= 1 && t >= 0 && t <= 1)) 
 	{
-		//building->SetContactState(YES_CONTACT);
 		return true;
 	}
-
-	//building->SetContactState(NO_CONTACT);
 	return false;
 }
-CCPoint ECLine::GetLineEndPoint()
-{
-	return line_end_point_;
+
+void ECLine::AttachLineToTowers(ECTower* tower_a, ECTower* tower_b) {
+	tower_a_ = tower_a;
+	tower_b_ = tower_b;
+
+	UpdatePosition();
+}
+
+void ECLine::UpdatePosition() {
+	if (tower_a_ != NULL && tower_b_ != NULL) {
+		if (line_type_ == LINE_REAL) {
+			line_head_ = ccp(tower_a_->getPosition().x - (tower_a_->getContentSize().width * 0.5f * 0.116f),
+						     tower_a_->getPosition().y + (tower_a_->getContentSize().height * 0.37f));
+			line_tail_ = ccp(tower_b_->getPosition().x - (tower_b_->getContentSize().width * 0.5f * 0.116f),
+							 tower_b_->getPosition().y + (tower_b_->getContentSize().height * 0.37f));
+		} 
+		else if (line_type_ == LINE_SHADOW) {
+			line_head_ = ccp(tower_a_->getPosition().x + (tower_a_->getContentSize().width * 0.5f * 0.62f),
+							 tower_a_->getPosition().y - (tower_a_->getContentSize().height * 0.24f));
+			line_tail_ = ccp(tower_b_->getPosition().x + (tower_b_->getContentSize().width * 0.5f * 0.62f),
+							 tower_b_->getPosition().y - (tower_b_->getContentSize().height * 0.24f));
+		}
+
+
+		float diff_x = line_tail_.x - line_head_.x; // x difference
+		float diff_y = line_tail_.y - line_head_.y; // y difference
+
+		//float diff = ccpDistance(towerPointB, towerPointA);
+
+		float length = sqrtf((diff_x*diff_x) + (diff_y*diff_y)); // distance between two points
+		float angle_in_rad = atan2f(diff_y, diff_x); 
+		float angle_in_deg = CC_RADIANS_TO_DEGREES(angle_in_rad) * -1;
+
+		this->setPosition(line_head_);
+		this->setRotation(angle_in_deg);
+		this->setScaleX(length / this->getContentSize().width);
+	}
 }
 
 

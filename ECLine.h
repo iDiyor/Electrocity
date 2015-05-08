@@ -10,23 +10,36 @@ using namespace cocos2d;
 class ECTower;
 class ECBuilding;
 
+// function of a line, whether real or acts as shadow
+enum LineType {
+	LINE_REAL,
+	LINE_SHADOW
+};
+
 class ECLine : public CCSprite
 {
 public:
+
 	virtual bool init();
 	CREATE_FUNC(ECLine);
 
 	ECLine();
 	~ECLine();
-	
-	void ResetLineBetweenTowers(ECTower* tower_a, ECTower* tower_b);
-	void ResetLineShadowBetweenTowers(ECTower* tower_a, ECTower* tower_b);
+
+	void SetLineType(LineType line_type);
+
 	bool CheckCollisionWithBuilding(ECBuilding* building);
 
-	CCPoint GetLineEndPoint();
+	void AttachLineToTowers(ECTower* tower_a, ECTower* tower_b);
+	void UpdatePosition();
 private:
 
-	CCPoint line_start_point_;
-	CCPoint line_end_point_;
+	LineType line_type_;
+
+	CCPoint line_head_;
+	CCPoint line_tail_;
+
+	ECTower* tower_a_;
+	ECTower* tower_b_;
 };
 #endif //__EC_LINE_H__

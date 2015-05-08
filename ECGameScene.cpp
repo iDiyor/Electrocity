@@ -132,8 +132,8 @@ bool ECGameScene::InitGameLayerToLayer(std::string& level)
 																	   NULL,
 																	   this,
 																	   menu_selector(ECGameScene::RestartGame));
-		game_restart_button->setPosition(ccp(game_restart_button->getPosition().x - game_restart_button->getContentSize().width - 5,
-											game_restart_button->getPosition().y));
+		game_restart_button->setPosition(ccp(game_pause_button->getPosition().x - game_restart_button->getContentSize().width - 5,
+											game_pause_button->getPosition().y));
 
 		CCMenu* game_ui_control_menu = CCMenu::create(game_pause_button, game_restart_button, NULL);
 		game_ui_control_menu->setPosition(0, 0);
@@ -141,7 +141,7 @@ bool ECGameScene::InitGameLayerToLayer(std::string& level)
 
 
 		// loading level data
-		game_level_data_ = new ECDataProviderExt("data4.xml", "levels", level.c_str());
+		game_level_data_ = new ECDataProviderExt("data.xml", "levels", level.c_str());
 		// set up level
 		this->LoadGameDataForLevel(level.c_str());
 		// seting current level
@@ -195,6 +195,7 @@ void ECGameScene::update(float delta)
 		ECTower* tower = static_cast<ECTower*>(towers_.at(i));
 		if (tower->GetTowerState() == ON_TOWER_TOUCH_MOVED || tower->GetTowerState() == ON_TOWER_TOUCH_ENDED)
 		{
+			//this->ResetLines(true, true);
 			this->ResetLines();
 
 			if (this->CheckForLineAndBuildingCollision())
@@ -250,7 +251,25 @@ void ECGameScene::LoadGameDataForLevel(const char* level)
 
 	//creating lines
 	bool is_lines_loop = game_level_data_->LoadLinesLoopAttribute();
+
 	this->CreateLines(is_lines_loop);
+
+	// creating extra inside lines
+	int tower_a_index = 0;
+	int tower_b_index = 0;
+	if (game_level_data_->LoadInsideLines(&tower_a_index, &tower_b_index)) {
+		if (tower_a_index != -1) 
+			AttachExtraInsideLine(tower_a_index, tower_b_index);
+	}
+
+	//creating extra outside lines
+	float pos_x;
+	float pos_y;
+	if (game_level_data_->LoadOutsideLines(&tower_a_index, &pos_x, &pos_y)) {
+		if (tower_a_index != -1) 
+			AttachExtraOutsideLine(tower_a_index, image_filename, pos_x, pos_y);
+	}
+
 
 	//clear for next use
 	mp_node_attributes.clear();
@@ -322,6 +341,7 @@ void ECGameScene::CreateLines(bool is_lines_loop)
 	for (unsigned int i = 0; i < lines_quantity; i++)
 	{
 		ECLine* line = ECLine::create();
+		line->SetLineType(LINE_REAL);
 		game_layer_spritesheet_->addChild(line, Z_LINES);
 		lines_.push_back(line);
 	}
@@ -331,61 +351,107 @@ void ECGameScene::CreateLines(bool is_lines_loop)
 	{
 		ECLine* line = ECLine::create();
 		line->setOpacity(30);
+		line->SetLineType(LINE_SHADOW);
 		game_layer_spritesheet_->addChild(line, Z_LINES);
 		lines_shadow_.push_back(line);
 	}
-	this->ResetLines();
+
+	// attach lines to their corresponding towers
+	this->AttachLines();
 }
-void ECGameScene::ResetLines()
-{
-	int counter_a = 0;
-	int counter_b = 0;
 
-	for (unsigned int i = 0; i < towers_.size(); i++)
-	{
-		if (i == towers_.size() - 1) //if i points to the last tower in the array
-		{
-			counter_a = 0; //first tower in array
-			counter_b = i; //last tower in array
+void ECGameScene::ResetLines() {
+	ECLine* line = NULL;
+	ECLine* line_shadow = NULL;
+	for (int i = 0; i < lines_.size(); i++) {
+		line = dynamic_cast<ECLine*>(lines_.at(i));
+		line_shadow = dynamic_cast<ECLine*>(lines_shadow_.at(i));
+
+		line->UpdatePosition();
+		line_shadow->UpdatePosition();
+	}
+}
+
+void ECGameScene::AttachLines() {
+	int tower_a_index = 0;
+	int tower_b_index = 0;
+
+	ECTower* tower_a	= NULL;
+	ECTower* tower_b	= NULL;
+	ECLine* line		= NULL;
+	ECLine* line_shadow = NULL;
+
+	for (unsigned int i = 0; i < towers_.size(); i++) 	{
+		if (i == towers_.size() - 1) { //if i points to the last tower in the array
+			tower_a_index = 0; //first tower in array
+			tower_b_index = i; //last tower in array
+		} else {
+			tower_a_index = i;		//couple first
+			tower_b_index = 1 + i;	// couple second
 		}
-		else
-		{
-			counter_a = i;		//couple first
-			counter_b = 1 + i;	// couple second
-		}
 
-		ECTower* tower_a = dynamic_cast<ECTower*>(towers_.at(counter_a));
-		ECTower* tower_b = dynamic_cast<ECTower*>(towers_.at(counter_b));
-		ECLine* line = NULL;
+		tower_a = dynamic_cast<ECTower*>(towers_.at(tower_a_index));
+		tower_b = dynamic_cast<ECTower*>(towers_.at(tower_b_index));
 
-		// i must not point to a greater number than lines` number in the array
-		if (i < lines_.size())
-		{
+		if (i < lines_.size()) {
 			line = dynamic_cast<ECLine*>(lines_.at(i));
+			line_shadow = dynamic_cast<ECLine*>(lines_shadow_.at(i));
 		}
 
-		if (tower_a && tower_b && line)
-		{
-			// updating line between two towers | position & scaleX
-			line->ResetLineBetweenTowers(tower_a, tower_b);
-		}
-
-		// line shadows
-		// i must not point to a greater number than lines` number in the array
-		if (i < lines_.size())
-		{
-			line = dynamic_cast<ECLine*>(lines_shadow_.at(i));
-		}
-
-		if (tower_a && tower_b && line)
-		{
-			// updating line between two towers | position & scaleX
-			line->ResetLineShadowBetweenTowers(tower_a, tower_b);
+		if (tower_a && tower_b && line) {
+			line->AttachLineToTowers(tower_a, tower_b);
+			line_shadow->AttachLineToTowers(tower_a, tower_b);
 		}
 	}
 }
-bool ECGameScene::CheckForLineAndBuildingCollision()
-{
+
+void ECGameScene::AttachExtraInsideLine(int tower_a_index, int tower_b_index) {
+	ECTower* tower_a = dynamic_cast<ECTower*>(towers_.at(tower_a_index));
+	ECTower* tower_b = dynamic_cast<ECTower*>(towers_.at(tower_b_index));
+
+	// real line
+	ECLine* line = ECLine::create();
+	line->SetLineType(LINE_REAL);
+	game_layer_spritesheet_->addChild(line, Z_LINES);
+	lines_.push_back(line);
+	
+	// shadow line
+	ECLine* line_shadow = ECLine::create();
+	line_shadow->setOpacity(30);
+	line_shadow->SetLineType(LINE_SHADOW);
+	game_layer_spritesheet_->addChild(line_shadow, Z_LINES);
+	lines_shadow_.push_back(line_shadow);
+
+	line->AttachLineToTowers(tower_a, tower_b);
+	line_shadow->AttachLineToTowers(tower_a, tower_b);
+}
+
+void ECGameScene::AttachExtraOutsideLine(int tower_a_index, const char* file_name, float pos_x, float pos_y) {
+	ECTower* tower_a = dynamic_cast<ECTower*>(towers_.at(tower_a_index));
+	
+	ECTower* tower_b = ECTower::CreateTowerWithFileName(file_name);
+	tower_b->setPosition(ccp(pos_x, pos_y));
+	game_layer_spritesheet_->addChild(tower_b, Z_TOWERS);
+	towers_.push_back(tower_b);
+
+	// real line
+	ECLine* line = ECLine::create();
+	line->SetLineType(LINE_REAL);
+	game_layer_spritesheet_->addChild(line, Z_LINES);
+	lines_.push_back(line);
+	
+	// shadow line
+	ECLine* line_shadow = ECLine::create();
+	line_shadow->setOpacity(30);
+	line_shadow->SetLineType(LINE_SHADOW);
+	game_layer_spritesheet_->addChild(line_shadow, Z_LINES);
+	lines_shadow_.push_back(line_shadow);
+
+	line->AttachLineToTowers(tower_a, tower_b);
+	line_shadow->AttachLineToTowers(tower_a, tower_b);
+}
+
+bool ECGameScene::CheckForLineAndBuildingCollision() {
 	ECLine* line = NULL;
 	ECBuilding* building = NULL;
 	for (int i = 0; i < lines_.size(); i++) {
